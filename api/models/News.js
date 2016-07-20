@@ -13,29 +13,16 @@ module.exports = {
     },
 
     text: {
-      type: 'text'
+      type: 'text',
+      required: true
     },
 
     learningboard: {
-      model: 'learningboard'
+      type: 'learningboard'
     },
 
     author: {
-      // TODO
-    },
-
-    last_modified: {
-      type: 'datetime'
-    },
-
-    post_time: {
-      type: 'datetime',
-      defaultsTo: Date.now
+      type: 'user'
     }
-  },
-
-  beforeUpdate: function (news, next) {
-    news.last_modified = Date.now;
-    next();
   }
 };

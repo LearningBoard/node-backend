@@ -22,7 +22,7 @@ module.exports = {
     },
 
     author: {
-      // TODO
+      model: 'user'
     },
 
     category: {
@@ -43,5 +43,14 @@ module.exports = {
       type: 'boolean',
       defaultsTo: false
     }
+  },
+
+  serialize: function (options, cb) {
+    LearningBoard.findOne(options.id).exec(function(err, learningboard) {
+      if(err) return cb(err);
+      if(!learningboard.coverImage) {
+        learningboard.coverImage = '/media/image-not-found.png';
+      }
+    });
   }
 };

@@ -40,21 +40,7 @@ module.exports = {
     },
 
     author: {
-      // TODO
-    },
-
-    last_modified: {
-      type: 'datetime'
-    },
-
-    post_time: {
-      type: 'datetime',
-      defaultsTo: Date.now
+      model: 'user'
     }
-  },
-
-  beforeUpdate: function (activity, next) {
-    activity.last_modified = Date.now;
-    next();
   }
 };

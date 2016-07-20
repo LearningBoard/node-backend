@@ -9,7 +9,7 @@ module.exports = {
 
   attributes: {
     user: {
-      // TODO
+      type: 'user'
     },
 
     learningboard: {
