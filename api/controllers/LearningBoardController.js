@@ -49,7 +49,13 @@ module.exports = {
   get: function (req, res) {
     LearningBoard.findOne({
       id: req.param('board_id')
-    }).exec(function(err, learningboard){
+    })
+    .populate('author', {select: ['id', 'username']})
+    .populate('category')
+    .populate('tags')
+    .populate('activities', {where: {publish: true}})
+    .populate('follow')
+    .populate('endorsement').exec(function(err, learningboard){
       if (err) {
         return res.status(500).send({
           success: false,
