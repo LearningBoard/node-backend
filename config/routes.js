@@ -38,30 +38,27 @@ module.exports.routes = {
 
   'GET /category': 'CategoryController.getAll',
 
-  'GET /lb/get/:board_id': 'LearningBoardController.get',
-  'GET /lb/load': 'LearningBoardController.getAll',
-  'GET /lb/user_load': 'LearningBoardController.getAllByUser',
-  'POST /lb/add': 'LearningBoardController.create',
-  'PUT /lb/edit/:board_id': 'LearningBoardController.update',
-  'DELETE /lb/delete/:board_id': 'LearningBoardController.delete',
   'POST /lb/publish/:board_id': 'LearningBoardController.publish',
-  'POST /lb/unpublish/:board_id': 'LearningBoardController.unpublish',
-  'POST /lb/follow': 'LearningBoardController.follow',
-  'POST /lb/unfollow': 'LearningBoardController.unfollow',
+  'POST /lb/follow/:board_id': 'LearningBoardController.follow',
+  'POST /lb/unfollow/:board_id': 'LearningBoardController.unfollow',
+  'POST /lb/activityorder/:board_id': 'LearningBoardController.orderchange', // TODO need testing
+  'GET /lb': 'LearningBoardController.getAll', // FIX user load
+  'POST /lb': 'LearningBoardController.create',
+  'GET /lb/:board_id': 'LearningBoardController.get',
+  'PUT /lb/:board_id': 'LearningBoardController.update',
+  'DELETE /lb/:board_id': 'LearningBoardController.delete',
 
-  'GET /activity/get/:activity_id': 'ActivityController.get',
-  'POST /activity/add/': 'ActivityController.create',
-  'PUT /activity/edit/:activity_id': 'ActivityController.update',
-  'DELETE /activity/delete/:activity_id': 'ActivityController.delete',
   'POST /activity/publish/:activity_id': 'ActivityController.publish',
-  'POST /activity/unpublish/:activity_id': 'ActivityController.unpublish',
-  'POST /activity/orderchange': 'ActivityController.orderchange',
+  'POST /activity': 'ActivityController.create',
+  'GET /activity/:activity_id': 'ActivityController.get',
+  'PUT /activity/:activity_id': 'ActivityController.update',
+  'DELETE /activity/:activity_id': 'ActivityController.delete',
 
   'GET /tag': 'TagController.getAll',
   'POST /tag': 'TagController.create',
 
-  // 'GET /news/getAll': 'NewsController.getAll',
-  'POST /news/add': 'NewsController.create'
+  'GET /news': 'NewsController.getAll',
+  'POST /news': 'NewsController.create'
 
   /***************************************************************************
   *                                                                          *

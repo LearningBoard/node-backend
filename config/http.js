@@ -30,35 +30,21 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // order: [
-    //   'startRequestTimer',
-    //   'cookieParser',
-    //   'session',
-    //   'myRequestLogger',
-    //   'bodyParser',
-    //   'handleBodyParserError',
-    //   'compress',
-    //   'methodOverride',
-    //   'poweredBy',
-    //   '$custom',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    //   '404',
-    //   '500'
-    // ],
-
-  /****************************************************************************
-  *                                                                           *
-  * Example custom middleware; logs each request to the console.              *
-  *                                                                           *
-  ****************************************************************************/
-
-    // myRequestLogger: function (req, res, next) {
-    //     console.log("Requested :: ", req.method, req.url);
-    //     return next();
-    // }
-
+    order: [
+    'startRequestTimer',
+    'cookieParser',
+    'session',
+    'bodyParser',
+    'handleBodyParserError',
+    'compress',
+    'methodOverride',
+    '$custom',
+    'router',
+    'www',
+    'favicon',
+    '404',
+    '500'
+  ],
 
   /***************************************************************************
   *                                                                          *

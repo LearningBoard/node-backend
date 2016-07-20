@@ -67,5 +67,14 @@ module.exports.policies = {
 
   'UserController': {
     'create': true
+  },
+
+  'CategoryController': {
+    'getAll': true
+  },
+
+  'LearningBoardController': {
+    'getAll': true,
+    'get': true
   }
 };

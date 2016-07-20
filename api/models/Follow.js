@@ -13,7 +13,7 @@ module.exports = {
     },
 
     learningboard: {
-      type: 'learningboard'
+      model: 'learningboard'
     }
   }
 };

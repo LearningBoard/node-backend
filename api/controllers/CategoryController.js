@@ -7,14 +7,22 @@
 
 module.exports = {
 
+  // Get all category
   getAll: function (req, res) {
     Category.find().exec(function(err, category){
-      res.send({
-        success: true,
-        data: {
-          category: category
-        }
-      });
+      if (err) {
+        return res.serverError({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true,
+          data: {
+            category: category
+          }
+        });
+      }
     });
   }
 

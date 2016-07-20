@@ -7,27 +7,43 @@
 
 module.exports = {
 
+  // Get all tag
   getAll: function (req, res) {
-    Tag.find().exec(function(err, tag){
-      res.send({
-        success: true,
-        data: {
-          tag: tag
-        }
-      });
+    Tag.find({select: ['id', 'tag']}).exec(function(err, tag){
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true,
+          data: {
+            tag: tag
+          }
+        });
+      }
     });
   },
 
+  // Create new tag
   create: function (req, res) {
     Tag.findOrCreate({
       tag: req.body.tag
     }).exec(function(err, tag){
-      res.send({
-        success: true,
-        data: {
-          tag: tag
-        }
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true,
+          data: {
+            tag: tag
+          }
+        });
+      }
     });
   }
 

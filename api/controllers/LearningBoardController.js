@@ -7,20 +7,37 @@
 
 module.exports = {
 
-  get: function (req, res) {
-    LearningBoard.find({
-      id: req.param('board_id')
-    }).exec(function(err, learningboard){
-      if (learningboard.length < 1) {
-        res.status(404).send({
+  // Get all published learning board general infomation
+  getAll: function (req, res) {
+    var constraint = {};
+    if (req.query.user) {
+      if (!req.session.authenticated) {
+        return res.status(403).send({
           success: false,
-          message: 'target not found'
+          message: 'Login required'
         });
       } else {
-        res.send({
+        // TODO user id constraint
+      }
+    }
+    LearningBoard.find({
+      publish: true
+    })
+    .populate('author', {select: ['id', 'username']})
+    .populate('category')
+    .populate('tags')
+    .populate('activities', {where: {publish: true}})
+    .populate('follow')
+    .populate('endorsement').exec(function(err, learningboard){
+      if (err) {
+        return res.serverError({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
           success: true,
           data: {
-            // TODO serialize, tag + activity
             learningboard: learningboard
           }
         });
@@ -28,129 +45,192 @@ module.exports = {
     });
   },
 
-  getAll: function (req, res) {
-    LearningBoard.find({
-      publish: true
+  // Get single learning board
+  get: function (req, res) {
+    LearningBoard.findOne({
+      id: req.param('board_id')
     }).exec(function(err, learningboard){
-      res.send({
-        success: true,
-        data: {
-          learningboard: learningboard
-        }
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else if (!learningboard) {
+        return res.status(404).send({
+          success: false,
+          message: 'Learning Board not found'
+        });
+      } else {
+        return res.send({
+          success: true,
+          data: {
+            learningboard: learningboard.toJSON(true)
+          }
+        });
+      }
     });
   },
 
-  getAllByUser: function (req, res) {
-    if (!req.body || !req.body.user_id) {
-      res.status(403).send({
-        success: false,
-        message: 'Login required'
-      })
-      return;
-    }
-    // TODO fix correct query
-    LearningBoard.find().exec(function(err, learningboard){
-      res.send({
-        success: true,
-        data: {
-          learningboard: learningboard
-        }
-      })
-    });
-  },
-
+  // Create new Learning Board
   create: function (req, res) {
     LearningBoard.create({
-      // TODO missing parameters
       title: req.body.title,
       description: req.body.description,
+      author: req.body.author_id,
       category: req.body.category,
       level: req.body.contentLevel
     }).exec(function(err, learningboard){
-      res.send({
-        success: true,
-        data: {
-          learningboard: learningboard
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        // Assign board id to tag
+        // TODO need testing
+        if (req.body['tag_list[]']) {
+          learningboard.tag.add(req.body['tag_list[]']);
         }
-      })
+        // Assign board id to previous saved activity
+        // TODO need testing
+        if (req.body['activity_list[]']) {
+          learningboard.activity.add(req.body['activity_list[]']);
+        }
+        // TODO cover image
+        // req.body.cover_img
+        return res.send({
+          success: true,
+          data: {
+            learningboard: learningboard
+          }
+        });
+      }
     });
   },
 
+  // Update existing Learning Board
   update: function (req, res) {
     LearningBoard.update({
       id: req.param('board_id')
     }, {
-      // TODO missing parameters
       title: req.body.title,
       description: req.body.description,
+      author: req.body.author_id,
       category: req.body.category,
       level: req.body.contentLevel
     }).exec(function(err, learningboard){
-      res.send({
-        success: true,
-        data: {
-          learningboard: learningboard
-        }
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        // TODO tag list
+        // TODO cover image
+        return res.send({
+          success: true,
+          data: {
+            learningboard: learningboard
+          }
+        });
+      }
     });
   },
 
+  // Delete existing Learning Board
   delete: function (req, res) {
     LearningBoard.destroy({
       id: req.param('board_id')
     }).exec(function(err){
-      res.send({
-        success: true
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true
+        });
+      }
     });
   },
 
+  // Set Learning Board public
   publish: function (req, res) {
     LearningBoard.update({
       id: req.param('board_id')
     }, {
-      publish: true
+      publish: req.body.publish || false
     }).exec(function(err, learningboard){
-      res.send({
-        success: true
-      })
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true
+        });
+      }
     });
   },
 
-  unpublish: function (req, res) {
-    LearningBoard.update({
-      id: req.param('board_id')
-    }, {
-      publish: false
-    }).exec(function(err, learningboard){
-      res.send({
-        success: true
-      })
-    });
-  },
-
+  // Handle user request for following Learning Board
   follow: function (req, res) {
     Follow.findOrCreate({
-      // TODO correct param name
-      user: req.body.user,
-      learningboard: req.body.learningboard
+      user: req.user.id,
+      learningboard: req.param('board_id')
     }).exec(function(err, follow){
-      res.send({
-        success: true
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true
+        });
+      }
     });
   },
 
+  // Handle user request for unfollowing Learning Board
   unfollow: function (req, res) {
     Follow.destroy({
-      // TODO correct param name
-      user: req.body.user,
-      learningboard: req.body.learningboard
+      user: req.user.id,
+      learningboard: req.param('board_id')
     }).exec(function(err, follow){
-      res.send({
-        success: true
-      });
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true
+        });
+      }
+    });
+  },
+
+  // Change activities order inside Learning Board
+  orderchange: function (req, res) {
+    var keys = [], values = [];
+    for (var key in req.body) {
+      keys.push({id: key});
+      values.push({order: req.body[key]});
+    }
+    Activity.update(keys, values).exec(function(err, activity){
+      if (err) {
+        return res.status(500).send({
+          success: false,
+          message: err
+        });
+      } else {
+        return res.send({
+          success: true
+        });
+      }
     });
   }
 

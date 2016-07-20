@@ -42,15 +42,42 @@ module.exports = {
     publish: {
       type: 'boolean',
       defaultsTo: false
-    }
-  },
+    },
 
-  serialize: function (options, cb) {
-    LearningBoard.findOne(options.id).exec(function(err, learningboard) {
-      if(err) return cb(err);
-      if(!learningboard.coverImage) {
-        learningboard.coverImage = '/media/image-not-found.png';
+    activities: {
+      collection: 'activity',
+      via: 'learningboard'
+    },
+
+    follow: {
+      collection: 'follow',
+      via: 'learningboard'
+    },
+
+    endorsement: {
+      collection: 'endorsement',
+      via: 'learningboard'
+    },
+
+    toJSON: function(returnDetail) {
+      var obj = this.toObject();
+      // statistics
+      obj.activity_num = obj.activity ? obj.activity.length : 0;
+      obj.following_num = obj.follow ? obj.follow.length : 0;
+      obj.completed_num = -1; // TODO
+      obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
+      // parse related info
+      if (!obj.tags) {
+        obj.tags = [];
       }
-    });
+      obj.image_url = -1; // TODO
+      // delete unwanted info
+      if (!returnDetail) {
+        delete obj.activity;
+      }
+      delete obj.follow;
+      delete obj.endorsement;
+      return obj;
+    }
   }
 };
