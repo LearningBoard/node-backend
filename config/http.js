@@ -56,9 +56,9 @@ module.exports.http = {
     var token = authString[1];
     require('jsonwebtoken').verify(token, sails.config.session.secret, function(err, user) {
       if (err || !user) {
-        return res.forbidden({
+        return res.status(403).send({
           success: false,
-          message: 'Invalid token'
+          message: err
         });
       }
       req.user = user;

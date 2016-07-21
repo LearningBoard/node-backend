@@ -71,7 +71,9 @@ _.merge(exports, {
           return res.json({
             success: true,
             data: {
-              token: jwt.sign(user, sails.config.session.secret),
+              token: jwt.sign(user, sails.config.session.secret, {
+                expiresIn: 60 * 60 * 24 // second
+              }),
               user: user
             }
           });
