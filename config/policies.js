@@ -50,7 +50,6 @@ module.exports.policies = {
 	// }
 
   '*': [
-    'jwtAuth',
     'sessionAuth',
     'ModelPolicy',
     'AuditPolicy',

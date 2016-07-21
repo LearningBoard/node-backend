@@ -36,6 +36,7 @@ module.exports.http = {
     'session',
     'bodyParser',
     'handleBodyParserError',
+    'parseAuthHeaderMiddleware',
     'compress',
     'methodOverride',
     '$custom',
@@ -45,6 +46,26 @@ module.exports.http = {
     '404',
     '500'
   ],
+
+  parseAuthHeaderMiddleware: function(req, res, next){
+    var auth = req.headers.authorization;
+    if (!auth || auth.search('Bearer ') !== 0) {
+      return next();
+    }
+    var authString = auth.split(' ');
+    var token = authString[1];
+    require('jsonwebtoken').verify(token, sails.config.session.secret, function(err, user) {
+      if (err || !user) {
+        return res.forbidden({
+          success: false,
+          message: 'Invalid token'
+        });
+      }
+      req.user = user;
+      req.session.authenticated = true;
+      next();
+    });
+  }
 
   /***************************************************************************
   *                                                                          *
