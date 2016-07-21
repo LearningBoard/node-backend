@@ -7,6 +7,7 @@
 
 var _ = require('lodash');
 var _super = require('sails-auth/api/controllers/AuthController');
+var jwt = require('jsonwebtoken');
 
 _.merge(exports, _super);
 _.merge(exports, {
@@ -60,6 +61,7 @@ _.merge(exports, {
           return res.json({
             success: true,
             data: {
+              token: jwt.sign(user, sails.config.session.secret),
               user: user
             }
           });

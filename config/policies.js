@@ -50,8 +50,7 @@ module.exports.policies = {
 	// }
 
   '*': [
-    'basicAuth',
-    'passport',
+    'jwtAuth',
     'sessionAuth',
     'ModelPolicy',
     'AuditPolicy',
