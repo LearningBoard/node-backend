@@ -12,6 +12,16 @@ var jwt = require('jsonwebtoken');
 _.merge(exports, _super);
 _.merge(exports, {
 
+  logout: function (req, res) {
+    req.logout();
+    delete req.user;
+    delete req.session.passport;
+    req.session.authenticated = false;
+    res.send({
+      success: true
+    });
+  },
+
   // Override sails-auth success response
   callback: function (req, res) {
     var action = req.param('action');
@@ -55,7 +65,7 @@ _.merge(exports, {
         }
 
         sails.log.info('user', user, 'authenticated successfully');
-        User.findOne({username: user.username})
+        User.findOne({id: user.id})
         .populate('roles', {select: ['id', 'name'], where: {active: true}})
         .exec(function(err, user){
           return res.json({

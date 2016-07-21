@@ -9,20 +9,20 @@ module.exports = {
 
   // Get all published learning board general infomation
   getAll: function (req, res) {
-    var constraint = {};
-    if (req.query.user) {
+    var constraint = {
+      publish: true
+    };
+    if (req.query.hasOwnProperty('user')) {
       if (!req.session.authenticated) {
         return res.status(403).send({
           success: false,
           message: 'Login required'
         });
       } else {
-        // TODO user id constraint
+        constraint['follow.user'] = req.user.id;
       }
     }
-    LearningBoard.find({
-      publish: true
-    })
+    LearningBoard.find(constraint)
     .populate('author', {select: ['id', 'username']})
     .populate('category')
     .populate('tags')
