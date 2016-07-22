@@ -17,12 +17,14 @@ module.exports = {
       type: 'text'
     },
 
+    // TODO may need to consider the type
     coverImage: {
       type: 'string'
     },
 
     author: {
-      model: 'user'
+      model: 'user',
+      required: true
     },
 
     category: {
@@ -31,12 +33,12 @@ module.exports = {
 
     level: {
       type: 'integer',
-      enum: [0, 1, 2],
+      enum: [0, 1, 2], // 0 = beginner 1 = intermediate 2 = advanced
       defaultsTo: 0
     },
 
     tags: {
-      model: 'tag'
+      collection: 'tag'
     },
 
     publish: {
@@ -50,33 +52,43 @@ module.exports = {
     },
 
     follow: {
-      collection: 'follow',
-      via: 'learningboard'
+      collection: 'user',
+      via: 'followedlearningboard'
     },
 
     endorsement: {
-      collection: 'endorsement',
+      collection: 'user',
+      via: 'endorsedlearningboard'
+    },
+
+    like: {
+      collection: 'user',
+      via: 'likedlearningboard'
+    },
+
+    news: {
+      collection: 'news',
       via: 'learningboard'
     },
 
-    toJSON: function(returnDetail) {
+    toJSON: function (filter) {
       var obj = this.toObject();
       // statistics
-      obj.activity_num = obj.activity ? obj.activity.length : 0;
+      obj.activity_num = obj.activities ? obj.activities.length : 0;
+      obj.like_num = obj.like ? obj.like.length : 0;
       obj.following_num = obj.follow ? obj.follow.length : 0;
       obj.completed_num = -1; // TODO
       obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
       // parse related info
-      if (!obj.tags) {
-        obj.tags = [];
-      }
       obj.image_url = -1; // TODO
       // delete unwanted info
-      if (!returnDetail) {
-        delete obj.activity;
+      if (filter && typeof filter.forEach === 'function') {
+        filter.forEach(function(item){
+          if (obj[item]) {
+            delete obj[item];
+          }
+        });
       }
-      delete obj.follow;
-      delete obj.endorsement;
       return obj;
     }
   }

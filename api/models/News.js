@@ -18,11 +18,13 @@ module.exports = {
     },
 
     learningboard: {
-      type: 'learningboard'
+      model: 'learningboard',
+      required: true
     },
 
     author: {
-      type: 'user'
+      model: 'user',
+      required: true
     }
   }
 };

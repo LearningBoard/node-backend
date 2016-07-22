@@ -11,7 +11,7 @@ module.exports = {
   getAll: function (req, res) {
     Tag.find({select: ['id', 'tag']}).exec(function(err, tag){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
@@ -30,14 +30,14 @@ module.exports = {
   create: function (req, res) {
     Tag.findOrCreate({
       tag: req.body.tag
-    }).exec(function(err, tag){
+    }, req.body, function(err, tag){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
       } else {
-        return res.send({
+        return res.created({
           success: true,
           data: {
             tag: tag

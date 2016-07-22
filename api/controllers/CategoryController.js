@@ -9,7 +9,9 @@ module.exports = {
 
   // Get all category
   getAll: function (req, res) {
-    Category.find().exec(function(err, category){
+    Category.find({
+      select: ['id', 'category']
+    }).exec(function(err, category){
       if (err) {
         return res.serverError({
           success: false,

@@ -31,7 +31,7 @@ module.exports = {
 
     publish: {
       type: 'boolean',
-      defaultsTo: false
+      defaultsTo: true
     },
 
     order: {
@@ -40,7 +40,13 @@ module.exports = {
     },
 
     author: {
-      model: 'user'
+      model: 'user',
+      required: true
+    },
+
+    like: {
+      collection: 'user',
+      via: 'likedactivities'
     }
   }
 };

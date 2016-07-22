@@ -8,9 +8,10 @@
 module.exports = {
 
   attributes: {
-    name: {
+    category: {
       type: 'string',
-      required: true
+      required: true,
+      minLength: 1
     }
   }
 };

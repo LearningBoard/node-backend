@@ -14,7 +14,7 @@ module.exports = {
     };
     if (req.query.hasOwnProperty('user')) {
       if (!req.session.authenticated) {
-        return res.status(403).send({
+        return res.forbidden({
           success: false,
           message: 'Login required'
         });
@@ -24,8 +24,8 @@ module.exports = {
     }
     LearningBoard.find(constraint)
     .populate('author', {select: ['id', 'username']})
-    .populate('category')
-    .populate('tags')
+    .populate('category', {select: ['id', 'name']})
+    .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
     .populate('follow')
     .populate('endorsement').exec(function(err, learningboard){
@@ -35,6 +35,9 @@ module.exports = {
           message: err
         });
       } else {
+        var learningboard = learningboard.map(function(lb){
+          return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
+        });
         return res.send({
           success: true,
           data: {
@@ -51,18 +54,18 @@ module.exports = {
       id: req.param('board_id')
     })
     .populate('author', {select: ['id', 'username']})
-    .populate('category')
-    .populate('tags')
+    .populate('category', {select: ['id', 'name']})
+    .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
     .populate('follow')
     .populate('endorsement').exec(function(err, learningboard){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
       } else if (!learningboard) {
-        return res.status(404).send({
+        return res.notFound({
           success: false,
           message: 'Learning Board not found'
         });
@@ -70,7 +73,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            learningboard: learningboard.toJSON(true)
+            learningboard: learningboard.toJSON(['like', 'follow', 'endorsement'])
           }
         });
       }
@@ -79,37 +82,49 @@ module.exports = {
 
   // Create new Learning Board
   create: function (req, res) {
-    LearningBoard.create({
-      title: req.body.title,
-      description: req.body.description,
-      author: req.body.author_id,
-      category: req.body.category,
-      level: req.body.contentLevel
-    }).exec(function(err, learningboard){
+    LearningBoard.create(req.body).exec(function(err, learningboard){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
       } else {
+        var needUpdate = false;
         // Assign board id to tag
-        // TODO need testing
         if (req.body['tag_list[]']) {
-          learningboard.tag.add(req.body['tag_list[]']);
+          learningboard.tags.add(req.body['tag_list[]']);
+          needUpdate = true;
         }
         // Assign board id to previous saved activity
-        // TODO need testing
         if (req.body['activity_list[]']) {
-          learningboard.activity.add(req.body['activity_list[]']);
+          learningboard.activities.add(req.body['activity_list[]']);
+          needUpdate = true;
         }
-        // TODO cover image
-        // req.body.cover_img
-        return res.send({
-          success: true,
-          data: {
-            learningboard: learningboard
-          }
-        });
+        // TODO handle cover image
+        if (needUpdate) {
+          learningboard.save(function(err){
+            if (err) {
+              return res.serverError({
+                success: false,
+                message: err
+              });
+            } else {
+              return res.created({
+                success: true,
+                data: {
+                  learningboard: learningboard
+                }
+              });
+            }
+          });
+        } else {
+          return res.created({
+            success: true,
+            data: {
+              learningboard: learningboard
+            }
+          });
+        }
       }
     });
   },
@@ -118,27 +133,44 @@ module.exports = {
   update: function (req, res) {
     LearningBoard.update({
       id: req.param('board_id')
-    }, {
-      title: req.body.title,
-      description: req.body.description,
-      author: req.body.author_id,
-      category: req.body.category,
-      level: req.body.contentLevel
-    }).exec(function(err, learningboard){
+    }, Object.assign(req.body, {tags: []})).exec(function(err, learningboard){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
       } else {
-        // TODO tag list
-        // TODO cover image
-        return res.send({
-          success: true,
-          data: {
-            learningboard: learningboard
-          }
-        });
+        var needUpdate = false;
+        // Assign board id to tag
+        if (req.body['tag_list[]']) {
+          learningboard.tags.add(req.body['tag_list[]']);
+          needUpdate = true;
+        }
+        // TODO handle cover image
+        if (needUpdate) {
+          learningboard.save(function(err){
+            if (err) {
+              return res.serverError({
+                success: false,
+                message: err
+              });
+            } else {
+              return res.send({
+                success: true,
+                data: {
+                  learningboard: learningboard
+                }
+              });
+            }
+          });
+        } else {
+          return res.send({
+            success: true,
+            data: {
+              learningboard: learningboard
+            }
+          });
+        }
       }
     });
   },
@@ -149,7 +181,7 @@ module.exports = {
       id: req.param('board_id')
     }).exec(function(err){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
@@ -169,7 +201,7 @@ module.exports = {
       publish: req.body.publish || false
     }).exec(function(err, learningboard){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
@@ -183,37 +215,31 @@ module.exports = {
 
   // Handle user request for following Learning Board
   follow: function (req, res) {
-    Follow.findOrCreate({
-      user: req.user.id,
-      learningboard: req.param('board_id')
-    }).exec(function(err, follow){
+    LearningBoard.findOne({
+      id: req.param('board_id')
+    }).populate('follow').exec(function(err, learningboard){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });
       } else {
-        return res.send({
-          success: true
-        });
-      }
-    });
-  },
-
-  // Handle user request for unfollowing Learning Board
-  unfollow: function (req, res) {
-    Follow.destroy({
-      user: req.user.id,
-      learningboard: req.param('board_id')
-    }).exec(function(err, follow){
-      if (err) {
-        return res.status(500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
+        if (req.body.follow) {
+          learningboard.follow.add(req.user.id);
+        } else {
+          learningboard.follow.remove(req.user.id);
+        }
+        learningboard.save(function(err){
+          if (err) {
+            return res.serverError({
+              success: false,
+              message: err
+            });
+          } else {
+            return res.send({
+              success: true
+            });
+          }
         });
       }
     });
@@ -228,7 +254,7 @@ module.exports = {
     }
     Activity.update(keys, values).exec(function(err, activity){
       if (err) {
-        return res.status(500).send({
+        return res.serverError({
           success: false,
           message: err
         });

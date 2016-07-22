@@ -11,7 +11,8 @@ module.exports = {
     tag: {
       type: 'string',
       required: true,
-      unique: true
+      unique: true,
+      minLength: 1
     }
   }
 };
