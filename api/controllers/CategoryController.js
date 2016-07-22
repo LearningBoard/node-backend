@@ -13,7 +13,7 @@ module.exports = {
       select: ['id', 'category']
     }).exec(function(err, category){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });

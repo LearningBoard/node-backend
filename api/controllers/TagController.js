@@ -11,7 +11,7 @@ module.exports = {
   getAll: function (req, res) {
     Tag.find({select: ['id', 'tag']}).exec(function(err, tag){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -32,7 +32,7 @@ module.exports = {
       tag: req.body.tag
     }, req.body, function(err, tag){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });

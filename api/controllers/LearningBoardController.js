@@ -30,7 +30,7 @@ module.exports = {
     .populate('follow')
     .populate('endorsement').exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -60,7 +60,7 @@ module.exports = {
     .populate('follow')
     .populate('endorsement').exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -73,7 +73,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            learningboard: learningboard.toJSON(['like', 'follow', 'endorsement'])
+            learningboard: learningboard.toJSON(['like', 'follow', 'endorsement'], req.user)
           }
         });
       }
@@ -84,7 +84,7 @@ module.exports = {
   create: function (req, res) {
     LearningBoard.create(req.body).exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -104,7 +104,7 @@ module.exports = {
         if (needUpdate) {
           learningboard.save(function(err){
             if (err) {
-              return res.serverError({
+              return res.status(err.status || 500).send({
                 success: false,
                 message: err
               });
@@ -135,7 +135,7 @@ module.exports = {
       id: req.param('board_id')
     }, Object.assign(req.body, {tags: []})).exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -150,7 +150,7 @@ module.exports = {
         if (needUpdate) {
           learningboard.save(function(err){
             if (err) {
-              return res.serverError({
+              return res.status(err.status || 500).send({
                 success: false,
                 message: err
               });
@@ -181,7 +181,7 @@ module.exports = {
       id: req.param('board_id')
     }).exec(function(err){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -201,7 +201,7 @@ module.exports = {
       publish: req.body.publish || false
     }).exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -219,7 +219,7 @@ module.exports = {
       id: req.param('board_id')
     }).populate('follow').exec(function(err, learningboard){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -231,7 +231,7 @@ module.exports = {
         }
         learningboard.save(function(err){
           if (err) {
-            return res.serverError({
+            return res.status(err.status || 500).send({
               success: false,
               message: err
             });
@@ -254,7 +254,7 @@ module.exports = {
     }
     Activity.update(keys, values).exec(function(err, activity){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });

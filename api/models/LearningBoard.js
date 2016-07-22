@@ -71,7 +71,7 @@ module.exports = {
       via: 'learningboard'
     },
 
-    toJSON: function (filter) {
+    toJSON: function (filter, user) {
       var obj = this.toObject();
       // statistics
       obj.activity_num = obj.activities ? obj.activities.length : 0;
@@ -80,6 +80,14 @@ module.exports = {
       obj.completed_num = -1; // TODO
       obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
       // parse related info
+      if (user && user.id) {
+        keyMapping = {follow: 'following', endorsement: 'endorsed', like: 'liked'};
+        for (var key in keyMapping) {
+          obj[keyMapping[key]] = obj[key].filter(function(item){
+            return item.id === user.id;
+          }).length > 0;
+        }
+      }
       obj.image_url = -1; // TODO
       // delete unwanted info
       if (filter && typeof filter.forEach === 'function') {

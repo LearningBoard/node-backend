@@ -15,7 +15,7 @@ module.exports = {
     .populate('author', {select: ['id', 'username']})
     .populate('learningboard', {select: ['id', 'title']}).exec(function(err, news){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
@@ -34,7 +34,7 @@ module.exports = {
   create: function (req, res) {
     News.create(req.body).exec(function(err, news){
       if (err) {
-        return res.serverError({
+        return res.status(err.status || 500).send({
           success: false,
           message: err
         });
