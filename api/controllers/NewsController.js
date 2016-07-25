@@ -7,45 +7,41 @@
 
 module.exports = {
 
-  // Get all news
+  // Get all news that is visible to user
   getAll: function (req, res) {
     News.find({
       'learningboard.follow.user': req.user.id
     })
     .populate('author', {select: ['id', 'username']})
-    .populate('learningboard', {select: ['id', 'title']}).exec(function(err, news){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true,
-          data: {
-            news: news
-          }
-        });
-      }
+    .populate('learningboard', {select: ['id', 'title']}).then(function(news){
+      return res.send({
+        success: true,
+        data: {
+          news: news
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
   // Create new news
   create: function (req, res) {
-    News.create(req.body).exec(function(err, news){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.created({
-          success: true,
-          data: {
-            news: news
-          }
-        });
-      }
+    News.create(req.body).then(function(news){
+      return res.created({
+        success: true,
+        data: {
+          news: news
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   }
 

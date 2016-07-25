@@ -9,20 +9,18 @@ module.exports = {
 
   // Get all tag
   getAll: function (req, res) {
-    Tag.find({select: ['id', 'tag']}).exec(function(err, tag){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true,
-          data: {
-            tag: tag
-          }
-        });
-      }
+    Tag.find({select: ['id', 'tag']}).then(function(tag){
+      return res.send({
+        success: true,
+        data: {
+          tag: tag
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -30,20 +28,18 @@ module.exports = {
   create: function (req, res) {
     Tag.findOrCreate({
       tag: req.body.tag
-    }, req.body, function(err, tag){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.created({
-          success: true,
-          data: {
-            tag: tag
-          }
-        });
-      }
+    }, req.body).then(function(tag){
+      return res.created({
+        success: true,
+        data: {
+          tag: tag
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   }
 

@@ -28,23 +28,21 @@ module.exports = {
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
     .populate('follow')
-    .populate('endorsement').exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        var learningboard = learningboard.map(function(lb){
-          return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
-        });
-        return res.send({
-          success: true,
-          data: {
-            learningboard: learningboard
-          }
-        });
-      }
+    .populate('endorsement').then(function(learningboard){
+      var learningboard = learningboard.map(function(lb){
+        return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
+      });
+      return res.send({
+        success: true,
+        data: {
+          learningboard: learningboard
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -58,13 +56,8 @@ module.exports = {
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
     .populate('follow')
-    .populate('endorsement').exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else if (!learningboard) {
+    .populate('endorsement').then(function(learningboard){
+      if (!learningboard) {
         return res.notFound({
           success: false,
           message: 'Learning Board not found'
@@ -77,55 +70,48 @@ module.exports = {
           }
         });
       }
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
   // Create new Learning Board
   create: function (req, res) {
-    LearningBoard.create(req.body).exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        var needUpdate = false;
-        // Assign board id to tag
-        if (req.body['tag_list[]']) {
-          learningboard.tags.add(req.body['tag_list[]']);
-          needUpdate = true;
-        }
-        // Assign board id to previous saved activity
-        if (req.body['activity_list[]']) {
-          learningboard.activities.add(req.body['activity_list[]']);
-          needUpdate = true;
-        }
-        // TODO handle cover image
-        if (needUpdate) {
-          learningboard.save(function(err){
-            if (err) {
-              return res.status(err.status || 500).send({
-                success: false,
-                message: err
-              });
-            } else {
-              return res.created({
-                success: true,
-                data: {
-                  learningboard: learningboard
-                }
-              });
-            }
-          });
-        } else {
-          return res.created({
-            success: true,
-            data: {
-              learningboard: learningboard
-            }
-          });
-        }
+    LearningBoard.create(req.body).then(function(learningboard){
+      Promise.resolve(learningboard);
+    }).then(function(learningboard){
+      var needUpdate = false;
+      // Assign board id to tag
+      if (req.body['tag_list[]']) {
+        learningboard.tags.add(req.body['tag_list[]']);
+        needUpdate = true;
       }
+      // Assign board id to previous saved activity
+      if (req.body['activity_list[]']) {
+        learningboard.activities.add(req.body['activity_list[]']);
+        needUpdate = true;
+      }
+      // TODO handle cover image
+      if (needUpdate) {
+        learningboard.save();
+      } else {
+        Promise.resolve(learningboard);
+      }
+    }).then(function(learningboard){
+      return res.created({
+        success: true,
+        data: {
+          learningboard: learningboard
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -133,45 +119,33 @@ module.exports = {
   update: function (req, res) {
     LearningBoard.update({
       id: req.param('board_id')
-    }, Object.assign(req.body, {tags: []})).exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        var needUpdate = false;
-        // Assign board id to tag
-        if (req.body['tag_list[]']) {
-          learningboard.tags.add(req.body['tag_list[]']);
-          needUpdate = true;
-        }
-        // TODO handle cover image
-        if (needUpdate) {
-          learningboard.save(function(err){
-            if (err) {
-              return res.status(err.status || 500).send({
-                success: false,
-                message: err
-              });
-            } else {
-              return res.send({
-                success: true,
-                data: {
-                  learningboard: learningboard
-                }
-              });
-            }
-          });
-        } else {
-          return res.send({
-            success: true,
-            data: {
-              learningboard: learningboard
-            }
-          });
-        }
+    }, Object.assign(req.body, {tags: []})).then(function(learningboard){
+      Promise.resolve(learningboard);
+    }).then(function(learningboard){
+      var needUpdate = false;
+      // Assign board id to tag
+      if (req.body['tag_list[]']) {
+        learningboard.tags.add(req.body['tag_list[]']);
+        needUpdate = true;
       }
+      // TODO handle cover image
+      if (needUpdate) {
+        learningboard.save();
+      } else {
+        Promise.resolve(learningboard);
+      }
+    }).then(function(learningboard){
+      return res.send({
+        success: true,
+        data: {
+          learningboard: learningboard
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -179,17 +153,15 @@ module.exports = {
   delete: function (req, res) {
     LearningBoard.destroy({
       id: req.param('board_id')
-    }).exec(function(err){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
-        });
-      }
+    }).then(function(){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -199,17 +171,15 @@ module.exports = {
       id: req.param('board_id')
     }, {
       publish: req.body.publish || false
-    }).exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
-        });
-      }
+    }).then(function(learningboard){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -217,31 +187,22 @@ module.exports = {
   follow: function (req, res) {
     LearningBoard.findOne({
       id: req.param('board_id')
-    }).populate('follow').exec(function(err, learningboard){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
+    }).populate('follow').then(function(learningboard){
+      if (req.body.follow) {
+        learningboard.follow.add(req.user.id);
       } else {
-        if (req.body.follow) {
-          learningboard.follow.add(req.user.id);
-        } else {
-          learningboard.follow.remove(req.user.id);
-        }
-        learningboard.save(function(err){
-          if (err) {
-            return res.status(err.status || 500).send({
-              success: false,
-              message: err
-            });
-          } else {
-            return res.send({
-              success: true
-            });
-          }
-        });
+        learningboard.follow.remove(req.user.id);
       }
+      learningboard.save();
+    }).then(function(learningboard){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -252,17 +213,15 @@ module.exports = {
       keys.push({id: key});
       values.push({order: req.body[key]});
     }
-    Activity.update(keys, values).exec(function(err, activity){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
-        });
-      }
+    Activity.update(keys, values).then(function(activity){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   }
 

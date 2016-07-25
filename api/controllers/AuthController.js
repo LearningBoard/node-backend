@@ -10,7 +10,7 @@ var _super = require('sails-auth/api/controllers/AuthController');
 var jwt = require('jsonwebtoken');
 
 _.merge(exports, _super);
-_.merge(exports, {
+_.merge(exports, { // Override sails-auth method
 
   logout: function (req, res) {
     req.logout();
@@ -22,7 +22,6 @@ _.merge(exports, {
     });
   },
 
-  // Override sails-auth success response
   callback: function (req, res) {
     var action = req.param('action');
 
@@ -39,7 +38,10 @@ _.merge(exports, {
       else {
         // make sure the server always returns a response to the client
         // i.e passport-local bad username/email or password
-        res.send(403, err);
+        res.send(403, {
+          success: false,
+          message: err
+        });
       }
     }
 
@@ -67,7 +69,7 @@ _.merge(exports, {
         sails.log.info('user', user, 'authenticated successfully');
         User.findOne({id: user.id})
         .populate('roles', {select: ['id', 'name'], where: {active: true}})
-        .exec(function(err, user){
+        .then(function(user){
           return res.json({
             success: true,
             data: {
@@ -76,6 +78,11 @@ _.merge(exports, {
               }),
               user: user
             }
+          });
+        }).catch(function(err){
+          return res.status(err.status || 500).send({
+            success: false,
+            message: err
           });
         });
       });

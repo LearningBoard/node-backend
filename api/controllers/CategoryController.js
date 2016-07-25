@@ -11,20 +11,18 @@ module.exports = {
   getAll: function (req, res) {
     Category.find({
       select: ['id', 'category']
-    }).exec(function(err, category){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true,
-          data: {
-            category: category
-          }
-        });
-      }
+    }).then(function(category){
+      return res.send({
+        success: true,
+        data: {
+          category: category
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   }
 

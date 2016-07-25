@@ -5,19 +5,26 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
+// Prepare data for model `data` column
+var prepareFilteredData = function(input){
+  var exclude_key = ['title', 'description', 'type', 'order', 'author', 'createdBy', 'owner'];
+  var data = {};
+  for (var key in input) {
+    if (exclude_key.indexOf(key) === -1) {
+      data[key] = input[key];
+    }
+  }
+  return data;
+};
+
 module.exports = {
 
   // Get single activity
   get: function (req, res) {
     Activity.findOne({
       id: req.param('activity_id')
-    }).exec(function(err, activity){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else if (!activity) {
+    }).then(function(activity){
+      if (!activity) {
         return res.notFound({
           success: false,
           message: 'activity not found'
@@ -30,60 +37,49 @@ module.exports = {
           }
         });
       }
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
   // Create new activity
   create: function (req, res) {
-    var exclude_key = ['pk', 'title', 'description', 'type', 'activity_id', 'author_id', 'order'];
-    var data = {};
-    for (var key in req.body) {
-      if (exclude_key.indexOf(key) === -1) {
-        data[key] = req.body[key];
-      }
-    }
-    Activity.create(Object.assign(req.body, {data: data})).exec(function(err, activity){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.created({
-          success: true,
-          data: {
-            activity: activity
-          }
-        });
-      }
+    var data = prepareFilteredData(req.body);
+    Activity.create(Object.assign(req.body, {data: data})).then(function(activity){
+      return res.created({
+        success: true,
+        data: {
+          activity: activity
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
   // Update existing activity
   update: function (req, res) {
-    var exclude_key = ['pk', 'title', 'description', 'type', 'activity_id', 'author_id', 'order'];
-    var data = {};
-    for (var key in req.body) {
-      if (exclude_key.indexOf(key) === -1) {
-        data[key] = req.body[key];
-      }
-    }
+    var data = prepareFilteredData(req.body);
     Activity.update({
       id: req.param('activity_id')
-    }, Object.assign(req.body, {data: data})).exec(function(err, activity){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true,
-          data: {
-            activity: activity
-          }
-        });
-      }
+    }, Object.assign(req.body, {data: data})).then(function(activity){
+      return res.send({
+        success: true,
+        data: {
+          activity: activity
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -91,17 +87,15 @@ module.exports = {
   delete: function (req, res) {
     Activity.destroy({
       id: req.param('activity_id')
-    }).exec(function(err){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
-        });
-      }
+    }).then(function(){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   },
 
@@ -111,17 +105,15 @@ module.exports = {
       id: req.param('activity_id')
     }, {
       publish: req.body.publish || false
-    }).exec(function(err, activity){
-      if (err) {
-        return res.status(err.status || 500).send({
-          success: false,
-          message: err
-        });
-      } else {
-        return res.send({
-          success: true
-        });
-      }
+    }).then(function(activity){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
     });
   }
 
