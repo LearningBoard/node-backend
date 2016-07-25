@@ -9,9 +9,7 @@ module.exports = {
 
   // Get all published learning board general infomation
   getAll: function (req, res) {
-    var constraint = {
-      publish: true
-    };
+    var constraint = {};
     if (req.query.hasOwnProperty('user')) {
       if (!req.session.authenticated) {
         return res.forbidden({
@@ -19,8 +17,13 @@ module.exports = {
           message: 'Login required'
         });
       } else {
-        constraint['follow.user'] = req.user.id;
+        constraint.or = [
+          {publish: true},
+          {author: req.user.id}
+        ];
       }
+    } else {
+      constraint.publish = true;
     }
     LearningBoard.find(constraint)
     .populate('author', {select: ['id', 'username']})
@@ -30,12 +33,23 @@ module.exports = {
     .populate('follow')
     .populate('endorsement').then(function(learningboard){
       var learningboard = learningboard.map(function(lb){
+        if (req.query.hasOwnProperty('user')) {
+          for (var user of lb.follow) {
+            if (user.id === req.user.id) {
+              return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
+              break;
+            }
+          }
+          return null;
+        }
         return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
       });
       return res.send({
         success: true,
         data: {
-          learningboard: learningboard
+          learningboard: learningboard.filter(function(lb){
+            return lb != null;
+          })
         }
       });
     }).catch(function(err){
@@ -81,24 +95,22 @@ module.exports = {
   // Create new Learning Board
   create: function (req, res) {
     LearningBoard.create(req.body).then(function(learningboard){
-      Promise.resolve(learningboard);
-    }).then(function(learningboard){
       var needUpdate = false;
       // Assign board id to tag
-      if (req.body['tag_list[]']) {
-        learningboard.tags.add(req.body['tag_list[]']);
+      if (req.body.tags) {
+        learningboard.tags.add(req.body.tags);
         needUpdate = true;
       }
       // Assign board id to previous saved activity
-      if (req.body['activity_list[]']) {
-        learningboard.activities.add(req.body['activity_list[]']);
+      if (req.body.activities) {
+        learningboard.activities.add(req.body.activities);
         needUpdate = true;
       }
       // TODO handle cover image
       if (needUpdate) {
-        learningboard.save();
+        return learningboard.save();
       } else {
-        Promise.resolve(learningboard);
+        return Promise.resolve(learningboard);
       }
     }).then(function(learningboard){
       return res.created({
@@ -120,19 +132,17 @@ module.exports = {
     LearningBoard.update({
       id: req.param('board_id')
     }, Object.assign(req.body, {tags: []})).then(function(learningboard){
-      Promise.resolve(learningboard);
-    }).then(function(learningboard){
       var needUpdate = false;
       // Assign board id to tag
-      if (req.body['tag_list[]']) {
-        learningboard.tags.add(req.body['tag_list[]']);
+      if (req.body.tags && req.body.tags.length > 0) {
+        learningboard.tags.add(req.body.tags);
         needUpdate = true;
       }
       // TODO handle cover image
       if (needUpdate) {
-        learningboard.save();
+        return learningboard.save();
       } else {
-        Promise.resolve(learningboard);
+        return Promise.resolve(learningboard);
       }
     }).then(function(learningboard){
       return res.send({
@@ -193,7 +203,7 @@ module.exports = {
       } else {
         learningboard.follow.remove(req.user.id);
       }
-      learningboard.save();
+      return learningboard.save();
     }).then(function(learningboard){
       return res.send({
         success: true
