@@ -36,6 +36,8 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+  'GET /user/me': 'UserController.me',
+
   'GET /category': 'CategoryController.getAll',
 
   'POST /lb/publish/:board_id': 'LearningBoardController.publish',
