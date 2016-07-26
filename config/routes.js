@@ -51,6 +51,7 @@ module.exports.routes = {
 
   'POST /activity/publish/:activity_id': 'ActivityController.publish',
   'POST /activity/complete/:activity_id': 'ActivityController.complete',
+  'POST /activity/like/:activity_id': 'ActivityController.like',
   'POST /activity': 'ActivityController.create',
   'GET /activity/:activity_id': 'ActivityController.get',
   'PUT /activity/:activity_id': 'ActivityController.update',

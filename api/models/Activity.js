@@ -56,10 +56,15 @@ module.exports = {
 
     toJSON: function (filter, user) {
       var obj = this.toObject();
-      if (user && user.id && obj.complete) {
-        obj.completed = obj.complete.filter(function(item){
-          return item.id === user.id;
-        }).length === 1;
+      // parse related info
+      if (user && user.id) {
+        var keyMapping = {complete: 'completed', like: 'liked'};
+        for (var key in keyMapping) {
+          if (!obj[key]) continue;
+          obj[keyMapping[key]] = obj[key].filter(function(item){
+            return item.id === user.id;
+          }).length === 1;
+        }
       }
       // delete unwanted info
       if (filter && typeof filter.forEach === 'function') {

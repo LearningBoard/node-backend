@@ -23,7 +23,9 @@ module.exports = {
   get: function (req, res) {
     Activity.findOne({
       id: req.param('activity_id')
-    }).populate('complete').then(function(activity){
+    })
+    .populate('complete')
+    .populate('like').then(function(activity){
       if (!activity) {
         return res.notFound({
           success: false,
@@ -33,7 +35,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            activity: activity.toJSON(['complete'], req.user)
+            activity: activity.toJSON(['complete', 'like'], req.user)
           }
         });
       }
@@ -126,6 +128,28 @@ module.exports = {
         activity.complete.add(req.user.id);
       } else {
         activity.complete.remove(req.user.id);
+      }
+      return activity.save();
+    }).then(function(activity){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
+  },
+
+  like: function (req, res) {
+    Activity.findOne({
+      id: req.param('activity_id')
+    }).then(function(activity){
+      if (req.body.like) {
+        activity.like.add(req.user.id);
+      } else {
+        activity.like.remove(req.user.id);
       }
       return activity.save();
     }).then(function(activity){
