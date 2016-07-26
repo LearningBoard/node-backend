@@ -23,7 +23,7 @@ module.exports = {
   get: function (req, res) {
     Activity.findOne({
       id: req.param('activity_id')
-    }).then(function(activity){
+    }).populate('complete').then(function(activity){
       if (!activity) {
         return res.notFound({
           success: false,
@@ -33,7 +33,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            activity: activity
+            activity: activity.toJSON(['complete'], req.user)
           }
         });
       }
@@ -105,6 +105,29 @@ module.exports = {
       id: req.param('activity_id')
     }, {
       publish: req.body.publish || false
+    }).then(function(activity){
+      return res.send({
+        success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
+  },
+
+  // User mark the activity as completed
+  complete: function (req, res) {
+    Activity.findOne({
+      id: req.param('activity_id')
+    }).then(function(activity){
+      if (req.body.complete) {
+        activity.complete.add(req.user.id);
+      } else {
+        activity.complete.remove(req.user.id);
+      }
+      return activity.save();
     }).then(function(activity){
       return res.send({
         success: true

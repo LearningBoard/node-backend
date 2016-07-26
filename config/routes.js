@@ -50,6 +50,7 @@ module.exports.routes = {
   'DELETE /lb/:board_id': 'LearningBoardController.delete',
 
   'POST /activity/publish/:activity_id': 'ActivityController.publish',
+  'POST /activity/complete/:activity_id': 'ActivityController.complete',
   'POST /activity': 'ActivityController.create',
   'GET /activity/:activity_id': 'ActivityController.get',
   'PUT /activity/:activity_id': 'ActivityController.update',

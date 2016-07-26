@@ -34,6 +34,12 @@ _.merge(exports, {
       collection: 'activity',
       via: 'like',
       dominant: true
+    },
+
+    completedactivities: {
+      collection: 'activity',
+      via: 'complete',
+      dominant: true
     }
   }
 
