@@ -94,6 +94,7 @@ module.exports = {
 
   // Create new Learning Board
   create: function (req, res) {
+    var lb;
     LearningBoard.create(req.body).then(function(learningboard){
       var needUpdate = false;
       // Assign board id to tag
@@ -108,6 +109,7 @@ module.exports = {
       }
       // TODO handle cover image
       if (needUpdate) {
+        lb = learningboard;
         return learningboard.save();
       } else {
         return Promise.resolve(learningboard);
@@ -116,7 +118,7 @@ module.exports = {
       return res.created({
         success: true,
         data: {
-          learningboard: learningboard
+          learningboard: learningboard || lb
         }
       });
     }).catch(function(err){
@@ -129,6 +131,7 @@ module.exports = {
 
   // Update existing Learning Board
   update: function (req, res) {
+    var lb;
     LearningBoard.update({
       id: req.param('board_id')
     }, Object.assign(req.body, {tags: []})).then(function(learningboard){
@@ -140,6 +143,7 @@ module.exports = {
       }
       // TODO handle cover image
       if (needUpdate) {
+        lb = learningboard;
         return learningboard.save();
       } else {
         return Promise.resolve(learningboard);
@@ -148,7 +152,7 @@ module.exports = {
       return res.send({
         success: true,
         data: {
-          learningboard: learningboard
+          learningboard: learningboard || lb
         }
       });
     }).catch(function(err){
