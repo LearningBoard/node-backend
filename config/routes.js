@@ -57,6 +57,8 @@ module.exports.routes = {
   'PUT /activity/:activity_id': 'ActivityController.update',
   'DELETE /activity/:activity_id': 'ActivityController.delete',
 
+  'POST /comment': 'CommentController.create',
+
   'GET /tag': 'TagController.getAll',
   'POST /tag': 'TagController.create',
 

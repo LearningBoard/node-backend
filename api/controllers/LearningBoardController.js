@@ -32,25 +32,31 @@ module.exports = {
     .populate('activities', {where: {publish: true}})
     .populate('follow')
     .populate('endorsement').then(function(learningboard){
+      var jobs = [];
       var learningboard = learningboard.map(function(lb){
         if (req.query.hasOwnProperty('user')) {
           for (var user of lb.follow) {
             if (user.id === req.user.id) {
-              return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
+              jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+                return lb;
+              }));
               break;
             }
           }
-          return null;
+        } else {
+          jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+            return lb;
+          }));
         }
-        return lb.toJSON(['activities', 'like', 'follow', 'endorsement']);
+        return null;
       });
-      return res.send({
-        success: true,
-        data: {
-          learningboard: learningboard.filter(function(lb){
-            return lb != null;
-          })
-        }
+      Promise.all(jobs).then(function(result){
+        return res.send({
+          success: true,
+          data: {
+            learningboard: result
+          }
+        });
       });
     }).catch(function(err){
       return res.status(err.status || 500).send({
@@ -77,11 +83,13 @@ module.exports = {
           message: 'Learning Board not found'
         });
       } else {
-        return res.send({
-          success: true,
-          data: {
-            learningboard: learningboard.toJSON(['like', 'follow', 'endorsement'], req.user)
-          }
+        return learningboard.toJSON(['like', 'follow', 'endorsement'], req.user).then(function(lb){
+          return res.send({
+            success: true,
+            data: {
+              learningboard: lb
+            }
+          });
         });
       }
     }).catch(function(err){

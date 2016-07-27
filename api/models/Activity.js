@@ -54,6 +54,11 @@ module.exports = {
       via: 'completedactivities'
     },
 
+    comments: {
+      collection: 'comment',
+      via: 'activity'
+    },
+
     toJSON: function (filter, user) {
       var obj = this.toObject();
       // parse related info

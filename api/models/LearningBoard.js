@@ -81,11 +81,12 @@ module.exports = {
       obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
       // parse related info
       if (user && user.id) {
-        keyMapping = {follow: 'following', endorsement: 'endorsed', like: 'liked'};
+        var keyMapping = {follow: 'following', endorsement: 'endorsed', like: 'liked'};
         for (var key in keyMapping) {
+          if (!obj[key]) continue;
           obj[keyMapping[key]] = obj[key].filter(function(item){
             return item.id === user.id;
-          }).length > 0;
+          }).length === 1;
         }
       }
       obj.image_url = -1; // TODO
@@ -97,7 +98,30 @@ module.exports = {
           }
         });
       }
-      return obj;
+      // Fetch activity comment (currently ORM lack of deep populate support)
+      var fetchActivityComment = null;
+      if (obj.activities && filter.indexOf('activities') === -1) {
+        fetchActivityComment = new Promise(function(resolve, reject){
+          var ids = obj.activities.map(function(item){
+            return item.id;
+          });
+          Activity.find({
+            id: ids
+          }).populate('comments').then(function(comment){
+            comment.forEach(function(item, i){
+              obj.activities[i] = item;
+            });
+            resolve();
+          }).catch(function(err){
+            reject(err);
+          });
+        });
+      }
+      return Promise.all([fetchActivityComment]).then(function(){
+        return obj;
+      }).catch(function(err){
+        return obj;
+      });
     }
   }
 };
