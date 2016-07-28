@@ -7,7 +7,7 @@
 
 // Prepare data for model `data` column
 var prepareFilteredData = function(input){
-  var exclude_key = ['title', 'description', 'type', 'order', 'author', 'createdBy', 'owner'];
+  var exclude_key = Object.keys(Activity.definition);
   var data = {};
   for (var key in input) {
     if (exclude_key.indexOf(key) === -1) {
