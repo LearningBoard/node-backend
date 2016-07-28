@@ -63,7 +63,9 @@ module.exports.routes = {
   'POST /tag': 'TagController.create',
 
   'GET /news': 'NewsController.getAll',
-  'POST /news': 'NewsController.create'
+  'POST /news': 'NewsController.create',
+
+  'POST /media': 'FileController.create'
 
   /***************************************************************************
   *                                                                          *

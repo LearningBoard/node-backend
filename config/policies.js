@@ -74,5 +74,9 @@ module.exports.policies = {
   'LearningBoardController': {
     'getAll': true,
     'get': true
+  },
+
+  'FileController': {
+    'create': [ 'sessionAuth' ]
   }
 };
