@@ -160,7 +160,7 @@ module.exports = {
       return res.send({
         success: true,
         data: {
-          learningboard: learningboard || lb
+          learningboard: (learningboard || lb)[0].toObject()
         }
       });
     }).catch(function(err){
@@ -230,12 +230,14 @@ module.exports = {
 
   // Change activities order inside Learning Board
   orderchange: function (req, res) {
-    var keys = [], values = [];
+    var jobs = []
     for (var key in req.body) {
-      keys.push({id: key});
-      values.push({order: req.body[key]});
+      if (['createdBy', 'owner'].indexOf(key) !== -1) continue;
+      jobs.push(Activity.update(key, {
+        order: parseInt(req.body[key])
+      }));
     }
-    Activity.update(keys, values).then(function(activity){
+    Promise.all(jobs).then(function(result){
       return res.send({
         success: true
       });
