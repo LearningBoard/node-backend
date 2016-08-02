@@ -81,5 +81,27 @@ module.exports = {
       }
       return obj;
     }
+  },
+
+  afterDestroy: function(deletedRecord, cb) {
+    Activity.find({
+      where: {
+        learningboard: deletedRecord.learningboard,
+        order: {
+          '>': deletedRecord.order
+        }
+      }
+    }).then(function(records) {
+      var jobs = [];
+      records.forEach(function(item) {
+        --item.order; // update other activity order
+        jobs.push(item.save());
+      });
+      return Promise.all(jobs);
+    }).then(function() {
+      cb();
+    }).catch(function(err) {
+      cb();
+    });
   }
 };

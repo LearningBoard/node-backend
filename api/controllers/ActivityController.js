@@ -74,7 +74,7 @@ module.exports = {
       return res.send({
         success: true,
         data: {
-          activity: activity
+          activity: activity[0]
         }
       });
     }).catch(function(err){
