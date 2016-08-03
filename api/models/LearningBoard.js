@@ -99,7 +99,6 @@ module.exports = {
           }).length === 1;
         }
       }
-      obj.image_url = -1; // TODO
       // delete unwanted info
       if (filter && typeof filter.forEach === 'function') {
         filter.forEach(function(item){
@@ -110,7 +109,7 @@ module.exports = {
       }
       // Fetch activity comment (currently ORM lack of deep populate support)
       var fetchActivityComment = null;
-      if (obj.activities && filter.indexOf('activities') === -1) {
+      if (obj.activities) {
         fetchActivityComment = new Promise(function(resolve, reject){
           var ids = obj.activities.map(function(item){
             return item.id;

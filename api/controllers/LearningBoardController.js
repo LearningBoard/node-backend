@@ -47,6 +47,11 @@ module.exports = {
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         if (req.query.hasOwnProperty('user')) {
+          if (lb.author.id === req.user.id) {
+            return jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+              return lb;
+            }));
+          }
           for (var user of lb.follow) {
             if (user.id === req.user.id) {
               jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
