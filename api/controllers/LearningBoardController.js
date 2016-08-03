@@ -122,13 +122,6 @@ module.exports = {
     var lb;
     LearningBoard.create(req.body).then(function(learningboard){
       lb = learningboard;
-      // Assign board id to tag
-      if (req.body.tags) {
-        learningboard.tags.add(req.body.tags);
-        return learningboard.save();
-      }
-      return Promise.resolve();
-    }).then(function(){
       return updateActivityOrder(req.body.activities)
     }).then(function(){
       return res.created({
@@ -150,15 +143,8 @@ module.exports = {
     var lb;
     LearningBoard.update({
       id: req.param('board_id')
-    }, Object.assign(req.body, {tags: []})).then(function(learningboard){
+    }, req.body).then(function(learningboard){
       lb = learningboard[0];
-      // Assign board id to tag
-      if (req.body.tags && req.body.tags.length > 0) {
-        learningboard.tags.add(req.body.tags);
-        return learningboard.save();
-      }
-      return Promise.resolve();
-    }).then(function(){
       return updateActivityOrder(req.body.activities);
     }).then(function(){
       return res.send({
