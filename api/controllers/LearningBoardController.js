@@ -5,6 +5,18 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
 
+ // Change activities order inside Learning Board
+ var updateActivityOrder = function(activityIds) {
+   var order = 0;
+   var jobs = [];
+   for (var key of activityIds) {
+     jobs.push(Activity.update(key, {
+       order: order++
+     }));
+   }
+   return Promise.all(jobs);
+ };
+
 module.exports = {
 
   // Get all published learning board general infomation
@@ -104,29 +116,20 @@ module.exports = {
   create: function (req, res) {
     var lb;
     LearningBoard.create(req.body).then(function(learningboard){
-      var needUpdate = false;
+      lb = learningboard;
       // Assign board id to tag
       if (req.body.tags) {
         learningboard.tags.add(req.body.tags);
-        needUpdate = true;
-      }
-      // Assign board id to previous saved activity
-      if (req.body.activities) {
-        learningboard.activities.add(req.body.activities);
-        needUpdate = true;
-      }
-      // TODO handle cover image
-      if (needUpdate) {
-        lb = learningboard;
         return learningboard.save();
-      } else {
-        return Promise.resolve(learningboard);
       }
-    }).then(function(learningboard){
+      return Promise.resolve();
+    }).then(function(){
+      return updateActivityOrder(req.body.activities)
+    }).then(function(){
       return res.created({
         success: true,
         data: {
-          learningboard: learningboard || lb
+          learningboard: lb.toObject()
         }
       });
     }).catch(function(err){
@@ -143,24 +146,20 @@ module.exports = {
     LearningBoard.update({
       id: req.param('board_id')
     }, Object.assign(req.body, {tags: []})).then(function(learningboard){
-      var needUpdate = false;
+      lb = learningboard[0];
       // Assign board id to tag
       if (req.body.tags && req.body.tags.length > 0) {
         learningboard.tags.add(req.body.tags);
-        needUpdate = true;
-      }
-      // TODO handle cover image
-      if (needUpdate) {
-        lb = learningboard;
         return learningboard.save();
-      } else {
-        return Promise.resolve(learningboard);
       }
-    }).then(function(learningboard){
+      return Promise.resolve();
+    }).then(function(){
+      return updateActivityOrder(req.body.activities);
+    }).then(function(){
       return res.send({
         success: true,
         data: {
-          learningboard: (learningboard || lb)[0].toObject()
+          learningboard: lb.toObject()
         }
       });
     }).catch(function(err){
@@ -217,27 +216,6 @@ module.exports = {
       }
       return learningboard.save();
     }).then(function(learningboard){
-      return res.send({
-        success: true
-      });
-    }).catch(function(err){
-      return res.status(err.status || 500).send({
-        success: false,
-        message: err
-      });
-    });
-  },
-
-  // Change activities order inside Learning Board
-  orderchange: function (req, res) {
-    var jobs = []
-    for (var key in req.body) {
-      if (['createdBy', 'owner'].indexOf(key) !== -1) continue;
-      jobs.push(Activity.update(key, {
-        order: parseInt(req.body[key])
-      }));
-    }
-    Promise.all(jobs).then(function(result){
       return res.send({
         success: true
       });

@@ -84,7 +84,7 @@ module.exports = {
   },
 
   beforeCreate: function(values, cb) {
-    if (values.order) next();
+    if (values.order) return cb();
     Activity.count({
       learningboard: values.learningboard
     }).then(function(count){

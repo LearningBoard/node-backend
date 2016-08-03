@@ -42,7 +42,6 @@ module.exports.routes = {
 
   'POST /lb/publish/:board_id': 'LearningBoardController.publish',
   'POST /lb/follow/:board_id': 'LearningBoardController.follow',
-  'POST /lb/activityorder/': 'LearningBoardController.orderchange',
   'GET /lb': 'LearningBoardController.getAll',
   'POST /lb': 'LearningBoardController.create',
   'GET /lb/:board_id': 'LearningBoardController.get',
