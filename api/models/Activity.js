@@ -83,6 +83,18 @@ module.exports = {
     }
   },
 
+  beforeCreate: function(values, cb) {
+    if (values.order) next();
+    Activity.count({
+      learningboard: values.learningboard
+    }).then(function(count){
+      values.order = count;
+      cb();
+    }).catch(function(err){
+      cb();
+    });
+  },
+
   afterDestroy: function(deletedRecord, cb) {
     Activity.find({
       where: {

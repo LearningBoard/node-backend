@@ -50,7 +50,11 @@ module.exports = {
   // Create new activity
   create: function (req, res) {
     var data = prepareFilteredData(req.body);
-    Activity.create(Object.assign(req.body, {data: data})).then(function(activity){
+    var field = Object.assign(req.body, {data: data});
+    if (!field.author) {
+      field.author = req.user.id;
+    }
+    Activity.create(field).then(function(activity){
       return res.created({
         success: true,
         data: {
