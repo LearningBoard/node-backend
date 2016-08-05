@@ -87,8 +87,29 @@ module.exports = {
       obj.activity_num = obj.activities ? obj.activities.length : 0;
       obj.like_num = obj.like ? obj.like.length : 0;
       obj.following_num = obj.follow ? obj.follow.length : 0;
-      obj.completed_num = -1; // TODO
       obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
+      var calculateCompletedNum = new Promise(function(resolve, reject) {
+        if (!obj.activity_num) {
+          obj.completed_num = 0;
+          return resolve();
+        }
+        User.find({
+          select: ['id', 'completedactivities']
+        }).populate('completedactivities', {where: {learningboard: obj.id}, select: ['id']}).then(function(result) {
+          var count = result.reduce(function(prev, item) {
+            if (item.completedactivities.length === obj.activity_num) {
+              return prev + 1;
+            } else {
+              return prev;
+            }
+          }, 0);
+          obj.completed_num = count;
+          resolve();
+        }).catch(function(err) {
+          obj.completed_num = 0;
+          reject(err);
+        });
+      });
       // parse related info
       if (user && user.id) {
         var keyMapping = {follow: 'following', endorsement: 'endorsed', like: 'liked'};
@@ -116,9 +137,9 @@ module.exports = {
           });
           Activity.find({
             id: ids
-          }).populate('comments').then(function(comment){
+          }).sort('order ASC').populate('comments').populate('complete').then(function(comment){
             comment.forEach(function(item, i){
-              obj.activities[i] = item;
+              obj.activities[i] = item.toJSON(['complete'], user);
             });
             resolve();
           }).catch(function(err){
@@ -126,15 +147,9 @@ module.exports = {
           });
         });
       }
-      return Promise.all([fetchActivityComment]).then(function(){
-        if (obj.activities) {
-          obj.activities.sort(sortActivityOrder);
-        }
+      return Promise.all([calculateCompletedNum, fetchActivityComment]).then(function(){
         return obj;
       }).catch(function(err){
-        if (obj.activities) {
-          obj.activities.sort(sortActivityOrder);
-        }
         return obj;
       });
     }
