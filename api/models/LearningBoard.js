@@ -137,9 +137,10 @@ module.exports = {
           });
           Activity.find({
             id: ids
-          }).sort('order ASC').populate('comments').populate('complete').then(function(comment){
+          }).sort('order ASC').populate('comments').populate('complete').populate('like')
+          .then(function(comment){
             comment.forEach(function(item, i){
-              obj.activities[i] = item.toJSON(['complete'], user);
+              obj.activities[i] = item.toJSON(['complete', 'like'], user);
             });
             resolve();
           }).catch(function(err){

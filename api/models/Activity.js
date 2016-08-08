@@ -61,6 +61,8 @@ module.exports = {
 
     toJSON: function (filter, user) {
       var obj = this.toObject();
+      // statistics
+      obj.like_num = obj.like ? obj.like.length : 0;
       // parse related info
       if (user && user.id) {
         var keyMapping = {complete: 'completed', like: 'liked'};
