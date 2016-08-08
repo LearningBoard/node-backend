@@ -128,7 +128,7 @@ module.exports = {
           }
         });
       }
-      // Fetch activity comment (currently ORM lack of deep populate support)
+      // Fetch activity details (currently ORM lack of deep populate support)
       var fetchActivityComment = null;
       if (obj.activities) {
         fetchActivityComment = new Promise(function(resolve, reject){
@@ -137,7 +137,11 @@ module.exports = {
           });
           Activity.find({
             id: ids
-          }).sort('order ASC').populate('comments').populate('complete').populate('like')
+          }).sort('order ASC')
+          .populate('author', {select: ['id', 'username']})
+          .populate('comments')
+          .populate('complete')
+          .populate('like')
           .then(function(comment){
             comment.forEach(function(item, i){
               obj.activities[i] = item.toJSON(['complete', 'like'], user);
