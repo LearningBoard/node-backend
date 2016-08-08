@@ -75,10 +75,14 @@ module.exports = {
     Activity.update({
       id: req.param('activity_id')
     }, Object.assign(req.body, {data: data})).then(function(activity){
+      return Activity.findOne({
+        id: activity[0].id
+      }).populate('author', {select: ['id', 'username']});
+    }).then(function(activity){
       return res.send({
         success: true,
         data: {
-          activity: activity[0]
+          activity: activity
         }
       });
     }).catch(function(err){
