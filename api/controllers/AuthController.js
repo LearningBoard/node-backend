@@ -69,6 +69,7 @@ _.merge(exports, { // Override sails-auth method
         sails.log.info('user', user, 'authenticated successfully');
         User.findOne({id: user.id})
         .populate('roles', {select: ['id', 'name'], where: {active: true}})
+        .populate('passports', {select: ['protocol', 'provider', 'identifier', 'tokens']})
         .then(function(user){
           return res.json({
             success: true,
