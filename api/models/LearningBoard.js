@@ -139,14 +139,22 @@ module.exports = {
             id: ids
           }).sort('order ASC')
           .populate('author', {select: ['id', 'username']})
-          .populate('comments')
           .populate('complete')
           .populate('like')
-          .then(function(comment){
-            comment.forEach(function(item, i){
+          .then(function(act){
+            var jobs = [];
+            act.forEach(function(item, i){
               obj.activities[i] = item.toJSON(['complete', 'like'], user);
+              jobs.push(Comment.find({
+                activity: item.id
+              }).populate('author', {select: ['id', 'username']}));
             });
-            resolve();
+            Promise.all(jobs).then(function(result) {
+              result.forEach(function(item, i) {
+                obj.activities[i]['comments'] = item;
+              });
+              resolve();
+            });
           }).catch(function(err){
             reject(err);
           });

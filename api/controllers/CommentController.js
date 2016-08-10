@@ -10,6 +10,8 @@ module.exports = {
   // Create new commenat
   create: function (req, res) {
     Comment.create(req.body).then(function(comment){
+      return Comment.findOne(comment.id).populate('author', {select: ['id', 'username']});
+    }).then(function(comment) {
       return res.created({
         success: true,
         data: {
