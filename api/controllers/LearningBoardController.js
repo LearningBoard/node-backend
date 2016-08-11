@@ -44,24 +44,25 @@ module.exports = {
     .populate('activities', {where: {publish: true}})
     .populate('follow')
     .populate('endorsement').then(function(learningboard){
+      var hiddenForOutput = ['activities', 'like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         if (req.query.hasOwnProperty('user')) {
           if (lb.author.id === req.user.id) {
-            return jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+            return jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
               return lb;
             }));
           }
           for (var user of lb.follow) {
             if (user.id === req.user.id) {
-              jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+              jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
                 return lb;
               }));
               break;
             }
           }
         } else {
-          jobs.push(lb.toJSON(['activities', 'like', 'follow', 'endorsement']).then(function(lb){
+          jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
             return lb;
           }));
         }
@@ -100,7 +101,8 @@ module.exports = {
           message: 'Learning Board not found'
         });
       } else {
-        return learningboard.toJSON(['like', 'follow', 'endorsement'], req.user).then(function(lb){
+        var hiddenForOutput = ['like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+        return learningboard.toJSON(hiddenForOutput, req.user).then(function(lb){
           return res.send({
             success: true,
             data: {
@@ -209,6 +211,43 @@ module.exports = {
     }).then(function(learningboard){
       return res.send({
         success: true
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
+  },
+
+  search : function (req, res) {
+    LearningBoard.find({
+      title: {
+        'contains': req.param('keyword')
+      },
+      publish: true
+    })
+    .populate('author', {select: ['id', 'username']})
+    .populate('category', {select: ['id', 'name']})
+    .populate('tags', {select: ['id', 'tag']})
+    .populate('activities', {where: {publish: true}})
+    .populate('follow')
+    .populate('endorsement').then(function(learningboard){
+      var hiddenForOutput = ['activities', 'like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+      var jobs = [];
+      var learningboard = learningboard.map(function(lb){
+        jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
+          return lb;
+        }));
+        return null;
+      });
+      Promise.all(jobs).then(function(result){
+        return res.send({
+          success: true,
+          data: {
+            learningboard: result
+          }
+        });
       });
     }).catch(function(err){
       return res.status(err.status || 500).send({

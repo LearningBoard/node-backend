@@ -64,6 +64,8 @@ module.exports.routes = {
   'GET /news': 'NewsController.getAll',
   'POST /news': 'NewsController.create',
 
+  'POST /search/lb': 'LearningBoard.search',
+
   'POST /media': 'FileController.create'
 
   /***************************************************************************
