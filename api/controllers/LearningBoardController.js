@@ -29,10 +29,15 @@ module.exports = {
           message: 'Login required'
         });
       } else {
-        constraint.or = [
-          {publish: true},
-          {author: req.user.id}
-        ];
+        if (req.param('user')) {
+          constraint.publish = true;
+          constraint.author = req.param('user');
+        } else {
+          constraint.or = [
+            {publish: true},
+            {author: req.user.id}
+          ];
+        }
       }
     } else {
       constraint.publish = true;
