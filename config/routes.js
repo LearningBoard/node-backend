@@ -37,6 +37,7 @@ module.exports.routes = {
   },
 
   'GET /user/me': 'UserController.me',
+  'GET /user/:user_id': 'UserController.get',
 
   'GET /category': 'CategoryController.getAll',
 
