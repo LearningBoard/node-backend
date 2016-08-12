@@ -13,6 +13,7 @@ _.merge(exports, { // Override sails-auth method
 
   get: function (req, res) {
     var userObj;
+    // Get basic info
     User.findOne({
       id: req.param('user_id')
     }).then(function(user) {
@@ -23,6 +24,7 @@ _.merge(exports, { // Override sails-auth method
         });
       }
       userObj = user.toObject();
+      // Get followed board
       return LearningBoard.find({select: ['id', 'title']}).populate('follow', {where: {id: user.id}});
     }).then(function(learningboard) {
       var lb = learningboard.map(function(item) {
@@ -36,11 +38,78 @@ _.merge(exports, { // Override sails-auth method
       userObj['followedlearningboard'] = lb.filter(function(item) {
         return item != null;
       });
-      return res.send({
-        success: true,
-        data: {
-          user: userObj
+      return Promise.resolve();
+    }).then(function() {
+      // Get recent activities
+      return RequestLog.find({
+        where: {
+          user: req.param('user_id'),
+          method: ['POST', 'PUT'],
+          model: ['learningboard', 'activity']
+        },
+        select: ['method', 'url', 'body', 'model', 'createdAt'],
+        sort: 'createdAt DESC',
+        limit: 30
+      });
+    }).then(function(log) {
+      // Filter log data
+      var lbJobs = [];
+      var hideFollowIdList = [];
+      log = log.map(function(item) {
+        var obj = item.toObject();
+        // Map method to action
+        switch (obj.method) {
+          case 'POST': obj.action = 'create'; break;
+          case 'PUT': obj.action = 'update'; break;
         }
+        delete obj.method;
+        // Filter unfollow
+        var isFollowAction = obj.url.match(/\/follow\/(.*)$/);
+        if (isFollowAction) {
+          if (hideFollowIdList.indexOf(isFollowAction[1]) !== -1) {
+            return null;
+          } else if (obj.body.follow === false) {
+            hideFollowIdList.push(isFollowAction[1]);
+            return null;
+          } else {
+            obj.body['learningboard'] = isFollowAction[1];
+          }
+        }
+        // Filter search
+        var isSearch = obj.url.match(/\/search\//);
+        if (isSearch) return null;
+        // Fetch learning board detail for activity
+        if (obj.body.learningboard) {
+          lbJobs.push(
+            LearningBoard.findOne({
+              where: {
+                id: obj.body.learningboard
+              },
+              select: ['id', 'title']
+            })
+          );
+        } else {
+          lbJobs.push(null);
+        }
+        delete obj.url;
+        return obj;
+      });
+      Promise.all(lbJobs).then(function(result) {
+        log.map(function(item, i) {
+          if (item.body.learningboard) {
+            item.body.learningboard = result[i];
+          }
+        });
+        log.filter(function(item) {
+          return item != null;
+        });
+        userObj['recentActivity'] = log.slice(0, 10);
+        return res.send({
+          success: true,
+          data: {
+            user: userObj
+          }
+        });
       });
     }).catch(function(err) {
       return res.status(err.status || 500).send({
