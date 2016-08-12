@@ -39,6 +39,8 @@ module.exports.routes = {
   'GET /user/me': 'UserController.me',
   'GET /user/:user_id': 'UserController.get',
 
+  'POST /auth/:provider/callbackAccessToken': 'AuthController.callbackAccessToken',
+
   'GET /category': 'CategoryController.getAll',
 
   'POST /lb/publish/:board_id': 'LearningBoardController.publish',
