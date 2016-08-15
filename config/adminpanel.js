@@ -139,7 +139,6 @@ module.exports.adminpanel = {
           displayField: 'title'
         },
         subscribe: false,
-        endorsement: false,
         like: false,
         news: false,
         owner: false,

@@ -106,7 +106,7 @@ module.exports = {
       });
       // parse related info
       if (user && user.id) {
-        var keyMapping = {subscribe: 'subscribing', endorsement: 'endorsed', like: 'liked'};
+        var keyMapping = {subscribe: 'subscribing', like: 'liked'};
         for (var key in keyMapping) {
           if (!obj[key]) continue;
           obj[keyMapping[key]] = obj[key].filter(function(item){

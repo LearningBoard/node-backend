@@ -47,9 +47,8 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('subscribe')
-    .populate('endorsement').then(function(learningboard){
-      var hiddenForOutput = ['activities', 'like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+    .populate('subscribe').then(function(learningboard){
+      var hiddenForOutput = ['activities', 'like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         if (req.query.hasOwnProperty('user') && !req.param('user')) {
@@ -98,15 +97,14 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('subscribe')
-    .populate('endorsement').then(function(learningboard){
+    .populate('subscribe').then(function(learningboard){
       if (!learningboard) {
         return res.notFound({
           success: false,
           message: 'Learning Board not found'
         });
       } else {
-        var hiddenForOutput = ['like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+        var hiddenForOutput = ['like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
         return learningboard.toJSON(hiddenForOutput, req.user).then(function(lb){
           return res.send({
             success: true,
@@ -236,9 +234,8 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('subscribe')
-    .populate('endorsement').then(function(learningboard){
-      var hiddenForOutput = ['activities', 'like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+    .populate('subscribe').then(function(learningboard){
+      var hiddenForOutput = ['activities', 'like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
