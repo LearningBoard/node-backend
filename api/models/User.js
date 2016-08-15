@@ -12,6 +12,12 @@ _.merge(exports, _super);
 _.merge(exports, {
 
   attributes: {
+
+    info: {
+      type: 'json',
+      defaultsTo: {}
+    },
+
     followedlearningboard: {
       collection: 'learningboard',
       via: 'follow',

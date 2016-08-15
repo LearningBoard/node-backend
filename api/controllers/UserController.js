@@ -119,6 +119,31 @@ _.merge(exports, { // Override sails-auth method
     });
   },
 
+  update: function (req, res) {
+    var allowKeys = ['email', 'info'];
+    var data = Object.keys(req.body).reduce(function(result, key) {
+      if (allowKeys.indexOf(key) !== -1) {
+        result[key] = req.body[key];
+      }
+      return result;
+    }, {});
+    User.update({
+      id: req.param('user_id')
+    }, data).then(function(user){
+      return res.send({
+        success: true,
+        data: {
+          user: user[0]
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
+  },
+
   me: function (req, res) {
     return res.send({
       success: true,
