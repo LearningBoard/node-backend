@@ -52,7 +52,7 @@ module.exports = {
       var hiddenForOutput = ['activities', 'like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
-        if (req.query.hasOwnProperty('user')) {
+        if (req.query.hasOwnProperty('user') && !req.param('user')) {
           if (lb.author.id === req.user.id) {
             return jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
               return lb;
