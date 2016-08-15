@@ -12,6 +12,7 @@ _.merge(exports, _super);
 _.merge(exports, { // Override sails-auth method
 
   get: function (req, res) {
+    var logObj;
     var userObj;
     // Get basic info
     User.findOne({
@@ -27,17 +28,14 @@ _.merge(exports, { // Override sails-auth method
       // Get followed board
       return LearningBoard.find({select: ['id', 'title']}).populate('follow', {where: {id: user.id}});
     }).then(function(learningboard) {
-      var lb = learningboard.map(function(item) {
-        var obj = item.toObject();
-        if (item.follow.length < 1) {
-          return null;
+      userObj['followedlearningboard'] = learningboard.reduce(function(result, item) {
+        if (item.follow.length > 0) {
+          var obj = item.toObject();
+          delete obj.follow;
+          result.push(obj);
         }
-        delete obj.follow;
-        return obj;
-      });
-      userObj['followedlearningboard'] = lb.filter(function(item) {
-        return item != null;
-      });
+        return result;
+      }, []);
       return Promise.resolve();
     }).then(function() {
       // Get recent activities
@@ -45,17 +43,18 @@ _.merge(exports, { // Override sails-auth method
         where: {
           user: req.param('user_id'),
           method: ['POST', 'PUT'],
-          model: ['learningboard', 'activity']
+          model: ['learningboard', 'activity', 'comment']
         },
         select: ['method', 'url', 'body', 'model', 'createdAt'],
         sort: 'createdAt DESC',
         limit: 30
       });
     }).then(function(log) {
+      logObj = log;
       // Filter log data
       var lbJobs = [];
-      var hideFollowIdList = [];
-      log = log.map(function(item) {
+      var hideIdList = {};
+      logObj = logObj.reduce(function(result, item) {
         var obj = item.toObject();
         // Map method to action
         switch (obj.method) {
@@ -63,23 +62,35 @@ _.merge(exports, { // Override sails-auth method
           case 'PUT': obj.action = 'update'; break;
         }
         delete obj.method;
-        // Filter unfollow
-        var isFollowAction = obj.url.match(/\/follow\/(.*)$/);
-        if (isFollowAction) {
-          if (hideFollowIdList.indexOf(isFollowAction[1]) !== -1) {
-            return null;
-          } else if (obj.body.follow === false) {
-            hideFollowIdList.push(isFollowAction[1]);
-            return null;
-          } else {
-            obj.body['learningboard'] = isFollowAction[1];
+        // Filter actions on Learning Board / Activity
+        var actionFilterMapping = [
+          {key: 'follow', value: false, regex: /\/follow\/(\d+)\/?$/, position: 1},
+          {key: 'like', value: false, regex: /\/like\/(\d+)\/?$/, position: 1},
+          {key: 'complete', value: false, regex: /\/complete\/(\d+)\/?$/, position: 1},
+          {key: 'publish', value: false, regex: /\/publish\/(\d+)\/?$/, position: 1}
+        ];
+        var shouldFilter = actionFilterMapping.some(function(filter) {
+          var isAction = obj.url.match(filter.regex);
+          if (isAction) {
+            if (!hideIdList[filter.key] || typeof hideIdList[filter.key].push !== 'function') {
+              hideIdList[filter.key] = [];
+            }
+            if (hideIdList[filter.key].indexOf(isAction[filter.position]) !== -1) {
+              return true;
+            } else if (obj.body[filter.key] === filter.value) {
+              hideIdList[filter.key].push(isAction[filter.position]);
+              return true;
+            } else {
+              obj.body['learningboard'] = isAction[filter.position];
+            }
           }
-        }
+        });
+        if (shouldFilter) return result;
         // Filter search
         var isSearch = obj.url.match(/\/search\//);
-        if (isSearch) return null;
+        if (isSearch) return result;
         // Fetch learning board detail for activity
-        if (obj.body.learningboard) {
+        if (obj.body && obj.body.learningboard) {
           lbJobs.push(
             LearningBoard.findOne({
               where: {
@@ -88,28 +99,41 @@ _.merge(exports, { // Override sails-auth method
               select: ['id', 'title']
             })
           );
+        // Fetch activity detail
+        } else if (obj.body && obj.body.activity) {
+          lbJobs.push(
+            Activity.findOne({
+              where: {
+                id: obj.body.activity
+              },
+              select: ['id', 'title', 'learningboard']
+            }).populate('learningboard', {select: ['id', 'title']})
+          );
         } else {
           lbJobs.push(null);
         }
         delete obj.url;
-        return obj;
-      });
-      Promise.all(lbJobs).then(function(result) {
-        log.map(function(item, i) {
-          if (item.body.learningboard) {
-            item.body.learningboard = result[i];
-          }
-        });
-        log.filter(function(item) {
-          return item != null;
-        });
-        userObj['recentActivity'] = log.slice(0, 10);
-        return res.send({
-          success: true,
-          data: {
-            user: userObj
-          }
-        });
+        result.push(obj);
+        return result;
+      }, []);
+      return Promise.all(lbJobs);
+    }).then(function(jobResult) {
+      userObj['recentActivity'] = logObj.reduce(function(result, item, i) {
+        if (i > 10) return result;
+        if (item.body && item.body.learningboard) {
+          item.body.learningboard = jobResult[i].toObject();
+        } else if (item.body && item.body.activity) {
+          jobResult[i].learningboard = jobResult[i].learningboard.toObject();
+          item.body.activity = jobResult[i].toObject();
+        }
+        result.push(item);
+        return result;
+      }, []);
+      return res.send({
+        success: true,
+        data: {
+          user: userObj
+        }
       });
     }).catch(function(err) {
       return res.status(err.status || 500).send({
