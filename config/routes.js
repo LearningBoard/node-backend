@@ -32,10 +32,6 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
-  '/': {
-    view: 'homepage'
-  },
-
   'GET /user/me': 'UserController.me',
   'GET /user/:user_id': 'UserController.get',
   'PUT /user/:user_id': 'UserController.update',

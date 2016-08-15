@@ -67,10 +67,6 @@ module.exports.policies = {
     'create': true
   },
 
-  'CategoryController': {
-    'getAll': true
-  },
-
   'LearningBoardController': {
     'getAll': true,
     'get': true
