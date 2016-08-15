@@ -55,6 +55,10 @@ module.exports = {
       field.author = req.user.id;
     }
     Activity.create(field).then(function(activity){
+      return Activity.findOne({
+        id: activity.id
+      }).populate('author', {select: ['id', 'username']});
+    }).then(function(activity) {
       return res.created({
         success: true,
         data: {
