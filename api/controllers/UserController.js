@@ -107,7 +107,7 @@ _.merge(exports, { // Override sails-auth method
                 id: obj.body.activity
               },
               select: ['id', 'title', 'learningboard']
-            }).populate('learningboard', {select: ['id', 'title']})
+            }).populate('lb', {select: ['id', 'title']})
           );
         } else {
           lbJobs.push(null);

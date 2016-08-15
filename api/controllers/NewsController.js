@@ -13,7 +13,7 @@ module.exports = {
       'learningboard.subscribe.user': req.user.id
     })
     .populate('author', {select: ['id', 'username']})
-    .populate('learningboard', {select: ['id', 'title']}).then(function(news){
+    .populate('lb', {select: ['id', 'title']}).then(function(news){
       return res.send({
         success: true,
         data: {
