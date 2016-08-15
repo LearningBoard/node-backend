@@ -47,9 +47,9 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('follow')
+    .populate('subscribe')
     .populate('endorsement').then(function(learningboard){
-      var hiddenForOutput = ['activities', 'like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+      var hiddenForOutput = ['activities', 'like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         if (req.query.hasOwnProperty('user') && !req.param('user')) {
@@ -58,7 +58,7 @@ module.exports = {
               return lb;
             }));
           }
-          for (var user of lb.follow) {
+          for (var user of lb.subscribe) {
             if (user.id === req.user.id) {
               jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
                 return lb;
@@ -77,7 +77,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            learningboard: result
+            lb: result
           }
         });
       });
@@ -98,7 +98,7 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('follow')
+    .populate('subscribe')
     .populate('endorsement').then(function(learningboard){
       if (!learningboard) {
         return res.notFound({
@@ -106,12 +106,12 @@ module.exports = {
           message: 'Learning Board not found'
         });
       } else {
-        var hiddenForOutput = ['like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+        var hiddenForOutput = ['like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
         return learningboard.toJSON(hiddenForOutput, req.user).then(function(lb){
           return res.send({
             success: true,
             data: {
-              learningboard: lb
+              lb: lb
             }
           });
         });
@@ -134,7 +134,7 @@ module.exports = {
       return res.created({
         success: true,
         data: {
-          learningboard: lb.toObject()
+          lb: lb.toObject()
         }
       });
     }).catch(function(err){
@@ -157,7 +157,7 @@ module.exports = {
       return res.send({
         success: true,
         data: {
-          learningboard: lb.toObject()
+          lb: lb.toObject()
         }
       });
     }).catch(function(err){
@@ -202,15 +202,15 @@ module.exports = {
     });
   },
 
-  // Handle user request for following Learning Board
-  follow: function (req, res) {
+  // Handle user request for subscribing Learning Board
+  subscribe: function (req, res) {
     LearningBoard.findOne({
       id: req.param('board_id')
-    }).populate('follow').then(function(learningboard){
-      if (req.body.follow) {
-        learningboard.follow.add(req.user.id);
+    }).populate('subscribe').then(function(learningboard){
+      if (req.body.subscribe) {
+        learningboard.subscribe.add(req.user.id);
       } else {
-        learningboard.follow.remove(req.user.id);
+        learningboard.subscribe.remove(req.user.id);
       }
       return learningboard.save();
     }).then(function(learningboard){
@@ -236,9 +236,9 @@ module.exports = {
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
-    .populate('follow')
+    .populate('subscribe')
     .populate('endorsement').then(function(learningboard){
-      var hiddenForOutput = ['activities', 'like', 'follow', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
+      var hiddenForOutput = ['activities', 'like', 'subscribe', 'endorsement', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
       var learningboard = learningboard.map(function(lb){
         jobs.push(lb.toJSON(hiddenForOutput).then(function(lb){
@@ -250,7 +250,7 @@ module.exports = {
         return res.send({
           success: true,
           data: {
-            learningboard: result
+            lb: result
           }
         });
       });

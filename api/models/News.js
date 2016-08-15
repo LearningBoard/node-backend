@@ -17,7 +17,7 @@ module.exports = {
       required: true
     },
 
-    learningboard: {
+    lb: {
       model: 'learningboard',
       required: true
     },

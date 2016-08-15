@@ -10,7 +10,7 @@ module.exports = {
   // Get all news that is visible to user
   getAll: function (req, res) {
     News.find({
-      'learningboard.follow.user': req.user.id
+      'learningboard.subscribe.user': req.user.id
     })
     .populate('author', {select: ['id', 'username']})
     .populate('learningboard', {select: ['id', 'title']}).then(function(news){

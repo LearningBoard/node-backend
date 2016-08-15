@@ -25,7 +25,7 @@ module.exports = {
       type: 'json'
     },
 
-    learningboard: {
+    lb: {
       model: 'learningboard'
     },
 
@@ -88,7 +88,7 @@ module.exports = {
   beforeCreate: function(values, cb) {
     if (values.order) return cb();
     Activity.count({
-      learningboard: values.learningboard
+      lb: values.lb
     }).then(function(count){
       values.order = count;
       cb();
@@ -100,7 +100,7 @@ module.exports = {
   afterDestroy: function(deletedRecord, cb) {
     Activity.find({
       where: {
-        learningboard: deletedRecord.learningboard,
+        lb: deletedRecord.lb,
         order: {
           '>': deletedRecord.order
         }

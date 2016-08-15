@@ -25,13 +25,13 @@ _.merge(exports, { // Override sails-auth method
         });
       }
       userObj = user.toObject();
-      // Get followed board
-      return LearningBoard.find({select: ['id', 'title']}).populate('follow', {where: {id: user.id}});
+      // Get subscribed board
+      return LearningBoard.find({select: ['id', 'title']}).populate('subscribe', {where: {id: user.id}});
     }).then(function(learningboard) {
-      userObj['followedlearningboard'] = learningboard.reduce(function(result, item) {
-        if (item.follow.length > 0) {
+      userObj['subscribedlb'] = learningboard.reduce(function(result, item) {
+        if (item.subscribe.length > 0) {
           var obj = item.toObject();
-          delete obj.follow;
+          delete obj.subscribe;
           result.push(obj);
         }
         return result;
@@ -64,7 +64,7 @@ _.merge(exports, { // Override sails-auth method
         delete obj.method;
         // Filter actions on Learning Board / Activity
         var actionFilterMapping = [
-          {key: 'follow', value: false, regex: /\/follow\/(\d+)\/?$/, position: 1},
+          {key: 'subscribe', value: false, regex: /\/subscribe\/(\d+)\/?$/, position: 1},
           {key: 'like', value: false, regex: /\/like\/(\d+)\/?$/, position: 1},
           {key: 'complete', value: false, regex: /\/complete\/(\d+)\/?$/, position: 1},
           {key: 'publish', value: false, regex: /\/publish\/(\d+)\/?$/, position: 1}

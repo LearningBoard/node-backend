@@ -58,27 +58,22 @@ module.exports = {
 
     activities: {
       collection: 'activity',
-      via: 'learningboard'
+      via: 'lb'
     },
 
-    follow: {
+    subscribe: {
       collection: 'user',
-      via: 'followedlearningboard'
-    },
-
-    endorsement: {
-      collection: 'user',
-      via: 'endorsedlearningboard'
+      via: 'subscribedlb'
     },
 
     like: {
       collection: 'user',
-      via: 'likedlearningboard'
+      via: 'likedlb'
     },
 
     news: {
       collection: 'news',
-      via: 'learningboard'
+      via: 'lb'
     },
 
     toJSON: function (filter, user) {
@@ -86,8 +81,7 @@ module.exports = {
       // statistics
       obj.activity_num = obj.activities ? obj.activities.length : 0;
       obj.like_num = obj.like ? obj.like.length : 0;
-      obj.following_num = obj.follow ? obj.follow.length : 0;
-      obj.endorsed_num = obj.endorsement ? obj.endorsement.length : 0;
+      obj.subscribing_num = obj.subscribe ? obj.subscribe.length : 0;
       var calculateCompletedNum = new Promise(function(resolve, reject) {
         if (!obj.activity_num) {
           obj.completed_num = 0;
@@ -95,7 +89,7 @@ module.exports = {
         }
         User.find({
           select: ['id', 'completedactivities']
-        }).populate('completedactivities', {where: {learningboard: obj.id}, select: ['id']}).then(function(result) {
+        }).populate('completedactivities', {where: {lb: obj.id}, select: ['id']}).then(function(result) {
           var count = result.reduce(function(prev, item) {
             if (item.completedactivities.length === obj.activity_num) {
               return prev + 1;
@@ -112,7 +106,7 @@ module.exports = {
       });
       // parse related info
       if (user && user.id) {
-        var keyMapping = {follow: 'following', endorsement: 'endorsed', like: 'liked'};
+        var keyMapping = {subscribe: 'subscribing', endorsement: 'endorsed', like: 'liked'};
         for (var key in keyMapping) {
           if (!obj[key]) continue;
           obj[keyMapping[key]] = obj[key].filter(function(item){

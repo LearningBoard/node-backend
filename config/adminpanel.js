@@ -43,28 +43,24 @@ module.exports.adminpanel = {
           displayField: 'name'
         },
         permissions: false,
-        followedlearningboard: {
-          title: 'Followed Learning Board',
+        subscribedlb: {
+          title: 'Subscribed Learning Board',
           model: 'LearningBoard',
           displayField: 'title'
         },
-        endorsedlearningboard: {
-          title: 'Endorsed Learning Board',
-          model: 'LearningBoard',
-          displayField: 'title'
-        },
-        likedlearningboard: {
+        info: 'Info',
+        likedlb: {
           title: 'Liked Learning Board',
           model: 'LearningBoard',
           displayField: 'title'
         },
         likedactivities: {
-          title: 'Followed Activity',
+          title: 'Liked Activity',
           model: 'Activity',
           displayField: 'title'
         },
         completedactivities: {
-          title: 'Followed Activity',
+          title: 'Completed Activity',
           model: 'Activity',
           displayField: 'title'
         },
@@ -81,9 +77,8 @@ module.exports.adminpanel = {
       },
       list: {
         fields: {
-          followedlearningboard: false,
-          endorsedlearningboard: false,
-          likedlearningboard: false,
+          subscribedlb: false,
+          likedlb: false,
           likedactivities: false,
           completedactivities: false,
           createdAt: false,
@@ -143,7 +138,7 @@ module.exports.adminpanel = {
           model: 'Activity',
           displayField: 'title'
         },
-        follow: false,
+        subscribe: false,
         endorsement: false,
         like: false,
         news: false,
@@ -195,7 +190,7 @@ module.exports.adminpanel = {
         },
         type: 'Type',
         data: 'Data',
-        learningboard: {
+        lb: {
           title: 'Learning Board',
           model: 'LearningBoard',
           displayField: 'title'
@@ -292,7 +287,7 @@ module.exports.adminpanel = {
           type: 'text',
           editor: true
         },
-        learningboard: {
+        lb: {
           title: 'Learning Board',
           model: 'LearningBoard',
           displayField: 'title'

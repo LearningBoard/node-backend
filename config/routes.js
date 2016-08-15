@@ -41,7 +41,7 @@ module.exports.routes = {
   'GET /category': 'CategoryController.getAll',
 
   'POST /lb/publish/:board_id': 'LearningBoardController.publish',
-  'POST /lb/follow/:board_id': 'LearningBoardController.follow',
+  'POST /lb/subscribe/:board_id': 'LearningBoardController.subscribe',
   'GET /lb': 'LearningBoardController.getAll',
   'POST /lb': 'LearningBoardController.create',
   'GET /lb/:board_id': 'LearningBoardController.get',

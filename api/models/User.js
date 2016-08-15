@@ -18,19 +18,13 @@ _.merge(exports, {
       defaultsTo: {}
     },
 
-    followedlearningboard: {
+    subscribedlb: {
       collection: 'learningboard',
-      via: 'follow',
+      via: 'subscribe',
       dominant: true
     },
 
-    endorsedlearningboard: {
-      collection: 'learningboard',
-      via: 'endorsement',
-      dominant: true
-    },
-
-    likedlearningboard: {
+    likedlb: {
       collection: 'learningboard',
       via: 'like',
       dominant: true
