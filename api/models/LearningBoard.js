@@ -71,11 +71,6 @@ module.exports = {
       via: 'likedlb'
     },
 
-    news: {
-      collection: 'news',
-      via: 'lb'
-    },
-
     toJSON: function (filter, user) {
       var obj = this.toObject();
       // statistics

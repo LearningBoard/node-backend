@@ -173,6 +173,67 @@ _.merge(exports, { // Override sails-auth method
       success: true,
       data: req.user
     });
+  },
+
+  news: function (req, res) {
+    var resultObj;
+    User.findOne({
+      where: {
+        id: req.user.id
+      },
+      select: ['id', 'subscribedlb']
+    }).populate('subscribedlb', {select: ['id', 'author']}).then(function(user) {
+      var queryBoardId = [], queryAuthorId = [];
+      user.subscribedlb.map(function(item) {
+        queryBoardId.push(item.id);
+        queryAuthorId.push(item.author);
+        return null;
+      });
+      return RequestLog.find({
+        where: {
+          method: 'POST',
+          model: 'activity',
+          url: {
+            'endsWith': '/activity'
+          },
+          user: queryAuthorId
+        },
+        select: ['id', 'method', 'body', 'user', 'createdAt'],
+        sort: 'createdAt DESC'
+      }).populate('user', {select: ['id', 'username']});
+    }).then(function(result){
+      var jobs = [];
+      resultObj = result.map(function(item) {
+        var obj = item.toObject();
+        // Map method to action
+        switch (obj.method) {
+          case 'POST': obj.action = 'create'; break;
+        }
+        delete obj.method;
+        delete obj.id;
+        jobs.push(LearningBoard.findOne({where: {id: obj.body.lb}, select: ['id', 'title']}));
+        return obj;
+      });
+      return Promise.all(jobs);
+    }).then(function(result) {
+      var output = result.reduce(function(array, item, i) {
+        if (!item) return array;
+        resultObj[i].body.lb = item.toObject();
+        array.push(resultObj[i]);
+        return array;
+      }, []);
+      return res.send({
+        success: true,
+        data: {
+          news: output
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
   }
 
 });

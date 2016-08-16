@@ -33,6 +33,7 @@ module.exports.routes = {
   ***************************************************************************/
 
   'GET /user/me': 'UserController.me',
+  'GET /user/news': 'UserController.news',
   'GET /user/:user_id': 'UserController.get',
   'PUT /user/:user_id': 'UserController.update',
 
@@ -60,9 +61,6 @@ module.exports.routes = {
 
   'GET /tag': 'TagController.getAll',
   'POST /tag': 'TagController.create',
-
-  'GET /news': 'NewsController.getAll',
-  'POST /news': 'NewsController.create',
 
   'POST /search/lb': 'LearningBoard.search',
 
