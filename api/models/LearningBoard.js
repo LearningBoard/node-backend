@@ -5,16 +5,6 @@
  * @docs        :: http://sailsjs.org/documentation/concepts/models-and-orm/models
  */
 
-var sortActivityOrder = function(a, b){ // currently ORM populate sort have some problem
-  if (a.order > b.order) {
-    return 1;
-  }
-  if (a.order < b.order) {
-    return -1;
-  }
-  return 0;
-};
-
 module.exports = {
 
   attributes: {
@@ -27,7 +17,6 @@ module.exports = {
       type: 'text'
     },
 
-    // TODO may need to consider the type
     coverImage: {
       type: 'string'
     },

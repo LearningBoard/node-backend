@@ -18,12 +18,7 @@ _.merge(exports, { // Override sails-auth method
     User.findOne({
       id: req.param('user_id')
     }).then(function(user) {
-      if (!user) {
-        return res.notFound({
-          success: false,
-          message: 'User not found'
-        });
-      }
+      if (!user) throw {status: 404, message: 'Not found'};
       userObj = user.toObject();
       // Get subscribed board
       return LearningBoard.find({select: ['id', 'title']}).populate('subscribe', {where: {id: user.id}});
@@ -36,8 +31,6 @@ _.merge(exports, { // Override sails-auth method
         }
         return result;
       }, []);
-      return Promise.resolve();
-    }).then(function() {
       // Get recent activities
       return RequestLog.find({
         where: {

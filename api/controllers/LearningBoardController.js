@@ -99,10 +99,10 @@ module.exports = {
     .populate('activities', {where: {publish: true}})
     .populate('subscribe').then(function(learningboard){
       if (!learningboard) {
-        return res.notFound({
-          success: false,
-          message: 'Learning Board not found'
-        });
+        throw {status: 404, message: 'Not found'};
+      } else if (!learningboard.publish && learningboard.author.id != req.user.id) {
+        // prevent access to unpublish board
+        throw {status: 403, message: 'Learning Board not published'};
       } else {
         var hiddenForOutput = ['like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
         return learningboard.toJSON(hiddenForOutput, req.user).then(function(lb){
@@ -169,7 +169,8 @@ module.exports = {
   // Delete existing Learning Board
   delete: function (req, res) {
     LearningBoard.destroy({
-      id: req.param('board_id')
+      id: req.param('board_id'),
+      author: req.user.id // ensure user own the learning board
     }).then(function(){
       return res.send({
         success: true
@@ -185,7 +186,8 @@ module.exports = {
   // Set Learning Board public
   publish: function (req, res) {
     LearningBoard.update({
-      id: req.param('board_id')
+      id: req.param('board_id'),
+      author: req.user.id // ensure user own the learning board
     }, {
       publish: req.body.publish || false
     }).then(function(learningboard){
@@ -223,7 +225,7 @@ module.exports = {
     });
   },
 
-  search : function (req, res) {
+  search: function (req, res) {
     LearningBoard.find({
       title: {
         'contains': req.param('keyword')

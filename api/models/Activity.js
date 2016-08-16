@@ -22,7 +22,8 @@ module.exports = {
     },
 
     data: {
-      type: 'json'
+      type: 'json',
+      defaultsTo: {}
     },
 
     lb: {

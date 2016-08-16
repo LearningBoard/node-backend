@@ -19,26 +19,19 @@ var prepareFilteredData = function(input){
 
 module.exports = {
 
-  // Get single activity
+  // Get single activity (mainly for edit activity use)
   get: function (req, res) {
     Activity.findOne({
-      id: req.param('activity_id')
-    })
-    .populate('complete')
-    .populate('like').then(function(activity){
-      if (!activity) {
-        return res.notFound({
-          success: false,
-          message: 'activity not found'
-        });
-      } else {
-        return res.send({
-          success: true,
-          data: {
-            activity: activity.toJSON(['complete', 'like'], req.user)
-          }
-        });
-      }
+      id: req.param('activity_id'),
+      author: req.user.id // ensure user own the activity
+    }).then(function(activity){
+      if (!activity) throw {status: 404, message: 'Not found'};
+      return res.send({
+        success: true,
+        data: {
+          activity: activity
+        }
+      });
     }).catch(function(err){
       return res.status(err.status || 500).send({
         success: false,
@@ -54,10 +47,28 @@ module.exports = {
     if (!field.author) {
       field.author = req.user.id;
     }
-    Activity.create(field).then(function(activity){
-      return Activity.findOne({
-        id: activity.id
-      }).populate('author', {select: ['id', 'username']});
+    // Check board ownership before creating activity
+    var checkBoardOwner = function() {
+      return new Promise(function(resolve, reject) {
+        if (req.body.lb) {
+          LearningBoard.findOne({
+            id: req.body.lb,
+            author: req.user.id
+          }).then(function(result) {
+            if (!result) return reject({status: 403, message: 'Not owning the Learning Board'});
+            resolve();
+          });
+        } else {
+          resolve();
+        }
+      });
+    };
+    return checkBoardOwner().then(function() {
+      return Activity.create(field);
+    }).then(function(activity){
+        return Activity.findOne({
+          id: activity.id
+        }).populate('author', {select: ['id', 'username']});
     }).then(function(activity) {
       return res.created({
         success: true,
@@ -100,7 +111,8 @@ module.exports = {
   // Delete existing activity
   delete: function (req, res) {
     Activity.destroy({
-      id: req.param('activity_id')
+      id: req.param('activity_id'),
+      author: req.user.id // ensure user own the activity
     }).then(function(){
       return res.send({
         success: true
@@ -116,7 +128,8 @@ module.exports = {
   // Set activity public
   publish: function (req, res) {
     Activity.update({
-      id: req.param('activity_id')
+      id: req.param('activity_id'),
+      author: req.user.id // ensure user own the activity
     }, {
       publish: req.body.publish || false
     }).then(function(activity){
