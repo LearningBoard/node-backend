@@ -81,7 +81,7 @@ _.merge(exports, { // Override sails-auth method
               hideIdList[filter.key].push(isAction[filter.position]);
               return true;
             } else {
-              obj.body['learningboard'] = isAction[filter.position];
+              obj.body['lb'] = isAction[filter.position];
             }
           }
         });
@@ -90,11 +90,11 @@ _.merge(exports, { // Override sails-auth method
         var isSearch = obj.url.match(/\/search\//);
         if (isSearch) return result;
         // Fetch learning board detail for activity
-        if (obj.body && obj.body.learningboard) {
+        if (obj.body && obj.body.lb) {
           lbJobs.push(
             LearningBoard.findOne({
               where: {
-                id: obj.body.learningboard
+                id: obj.body.lb
               },
               select: ['id', 'title']
             })
@@ -106,7 +106,7 @@ _.merge(exports, { // Override sails-auth method
               where: {
                 id: obj.body.activity
               },
-              select: ['id', 'title', 'learningboard']
+              select: ['id', 'title', 'lb']
             }).populate('lb', {select: ['id', 'title']})
           );
         } else {
@@ -120,10 +120,10 @@ _.merge(exports, { // Override sails-auth method
     }).then(function(jobResult) {
       userObj['recentActivity'] = logObj.reduce(function(result, item, i) {
         if (i > 10) return result;
-        if (item.body && item.body.learningboard) {
-          item.body.learningboard = jobResult[i].toObject();
+        if (item.body && item.body.lb) {
+          item.body.lb = jobResult[i].toObject();
         } else if (item.body && item.body.activity) {
-          jobResult[i].learningboard = jobResult[i].learningboard.toObject();
+          jobResult[i].lb = jobResult[i].lb.toObject();
           item.body.activity = jobResult[i].toObject();
         }
         result.push(item);
