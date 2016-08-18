@@ -140,7 +140,6 @@ module.exports.adminpanel = {
         },
         subscribe: false,
         like: false,
-        news: false,
         owner: false,
         createdBy: false,
         createdAt: {
@@ -272,58 +271,6 @@ module.exports.adminpanel = {
         }
       },
       edit: false
-    },
-
-    news: {
-      menuGroup: 'lb',
-      title: 'News',
-      model: 'News',
-      fields: {
-        id: false,
-        title: 'Title',
-        text: {
-          title: 'News Content',
-          type: 'text',
-          editor: true
-        },
-        lb: {
-          title: 'Learning Board',
-          model: 'LearningBoard',
-          displayField: 'title'
-        },
-        author: {
-          title: 'Author',
-          model: 'User',
-          displayField: 'username'
-        },
-        owner: false,
-        createdBy: false,
-        createdAt: {
-          title: 'Created',
-          type: 'datetime'
-        },
-        updatedAt: {
-          title: 'Updated',
-          type: 'datetime'
-        }
-      },
-      list: {
-        fields: {
-          text: false
-        }
-      },
-      add: {
-        fields: {
-          createdAt: false,
-          updatedAt: false
-        }
-      },
-      edit: {
-        fields: {
-          createdAt: false,
-          updatedAt: false
-        }
-      }
     },
 
     category: {
