@@ -112,7 +112,7 @@ _.merge(exports, { // Override sails-auth method
       return Promise.all(lbJobs);
     }).then(function(jobResult) {
       userObj['recentActivity'] = logObj.reduce(function(result, item, i) {
-        if (i > 10) return result;
+        if (!jobResult[i] || result.length > 10) return result;
         if (item.body && item.body.lb) {
           item.body.lb = jobResult[i].toObject();
         } else if (item.body && item.body.activity) {
