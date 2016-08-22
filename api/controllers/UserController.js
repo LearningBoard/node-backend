@@ -17,7 +17,7 @@ _.merge(exports, { // Override sails-auth method
     // Get basic info
     User.findOne({
       id: req.param('user_id')
-    }).then(function(user) {
+    }).populate('passports', {select: ['protocol', 'provider']}).then(function(user) {
       if (!user) throw {status: 404, message: 'Not found'};
       userObj = user.toObject();
       // Get subscribed board
@@ -57,10 +57,10 @@ _.merge(exports, { // Override sails-auth method
         delete obj.method;
         // Filter actions on Learning Board / Activity
         var actionFilterMapping = [
-          {key: 'subscribe', value: false, regex: /\/subscribe\/(\d+)\/?$/, position: 1},
-          {key: 'like', value: false, regex: /\/like\/(\d+)\/?$/, position: 1},
-          {key: 'complete', value: false, regex: /\/complete\/(\d+)\/?$/, position: 1},
-          {key: 'publish', value: false, regex: /\/publish\/(\d+)\/?$/, position: 1}
+          {key: 'subscribe', value: false, regex: /\/subscribe\/(\d+)\/?$/, position: 1, assignKey: 'lb'},
+          {key: 'like', value: false, regex: /\/like\/(\d+)\/?$/, position: 1, assignKey: 'activity'},
+          {key: 'complete', value: false, regex: /\/complete\/(\d+)\/?$/, position: 1, assignKey: 'activity'},
+          {key: 'publish', value: false, regex: /\/publish\/(\d+)\/?$/, position: 1, assignKey: 'lb'}
         ];
         var shouldFilter = actionFilterMapping.some(function(filter) {
           var isAction = obj.url.match(filter.regex);
@@ -74,7 +74,7 @@ _.merge(exports, { // Override sails-auth method
               hideIdList[filter.key].push(isAction[filter.position]);
               return true;
             } else {
-              obj.body['lb'] = isAction[filter.position];
+              obj.body[filter.assignKey] = parseInt(isAction[filter.position]);
             }
           }
         });
@@ -89,7 +89,7 @@ _.merge(exports, { // Override sails-auth method
               where: {
                 id: obj.body.lb
               },
-              select: ['id', 'title']
+              select: ['id', 'title', 'coverImage']
             })
           );
         // Fetch activity detail
@@ -100,7 +100,7 @@ _.merge(exports, { // Override sails-auth method
                 id: obj.body.activity
               },
               select: ['id', 'title', 'lb']
-            }).populate('lb', {select: ['id', 'title']})
+            }).populate('lb', {select: ['id', 'title', 'coverImage']})
           );
         } else {
           lbJobs.push(null);
