@@ -63,7 +63,14 @@ module.exports = {
     toJSON: function (filter, user) {
       var obj = this.toObject();
       // statistics
-      obj.activity_num = obj.activities ? obj.activities.length : 0;
+      obj.activity_num = obj.activities.reduce(function(count, item) {
+        if (item.publish) {
+          return ++count;
+        } else {
+          return count;
+        }
+      }, 0);
+      obj.activity_num_all = obj.activities ? obj.activities.length : 0;
       obj.like_num = obj.like ? obj.like.length : 0;
       obj.subscribing_num = obj.subscribe ? obj.subscribe.length : 0;
       var calculateCompletedNum = new Promise(function(resolve, reject) {
@@ -110,9 +117,14 @@ module.exports = {
       var fetchActivityComment = null;
       if (obj.activities) {
         fetchActivityComment = new Promise(function(resolve, reject){
-          var ids = obj.activities.map(function(item){
-            return item.id;
-          });
+          var ids = [];
+          obj.activities = obj.activities.reduce(function(array, item){
+            if (item.publish || (user && obj.author.id === user.id)) {
+              array.push(item);
+              ids.push(item.id);
+            }
+            return array;
+          }, []);
           Activity.find({
             id: ids
           }).sort('order ASC')

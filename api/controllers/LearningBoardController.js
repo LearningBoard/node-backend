@@ -46,7 +46,7 @@ module.exports = {
     .populate('author', {select: ['id', 'username']})
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
-    .populate('activities', {where: {publish: true}})
+    .populate('activities')
     .populate('subscribe').then(function(learningboard){
       var hiddenForOutput = ['activities', 'like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
       var jobs = [];
@@ -96,7 +96,7 @@ module.exports = {
     .populate('author', {select: ['id', 'username']})
     .populate('category', {select: ['id', 'name']})
     .populate('tags', {select: ['id', 'tag']})
-    .populate('activities', {where: {publish: true}})
+    .populate('activities')
     .populate('subscribe').then(function(learningboard){
       if (!learningboard) {
         throw {status: 404, message: 'Not found'};
