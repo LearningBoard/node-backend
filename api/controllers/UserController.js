@@ -204,7 +204,7 @@ _.merge(exports, { // Override sails-auth method
         }
         delete obj.method;
         delete obj.id;
-        jobs.push(LearningBoard.findOne({where: {id: obj.body.lb}, select: ['id', 'title']}));
+        jobs.push(LearningBoard.findOne({where: {id: obj.body.lb}, select: ['id', 'title', 'coverImage']}));
         return obj;
       });
       return Promise.all(jobs);
