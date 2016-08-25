@@ -44,7 +44,7 @@ module.exports = {
     }
     LearningBoard.find(constraint)
     .populate('author', {select: ['id', 'username']})
-    .populate('category', {select: ['id', 'name']})
+    .populate('category', {select: ['id', 'category']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities')
     .populate('subscribe').then(function(learningboard){
@@ -94,7 +94,7 @@ module.exports = {
       id: req.param('board_id')
     })
     .populate('author', {select: ['id', 'username']})
-    .populate('category', {select: ['id', 'name']})
+    .populate('category', {select: ['id', 'category']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities')
     .populate('subscribe').then(function(learningboard){
@@ -233,7 +233,7 @@ module.exports = {
       publish: true
     })
     .populate('author', {select: ['id', 'username']})
-    .populate('category', {select: ['id', 'name']})
+    .populate('category', {select: ['id', 'category']})
     .populate('tags', {select: ['id', 'tag']})
     .populate('activities', {where: {publish: true}})
     .populate('subscribe').then(function(learningboard){
