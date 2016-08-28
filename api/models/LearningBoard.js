@@ -45,6 +45,12 @@ module.exports = {
       defaultsTo: false
     },
 
+    visibility: {
+      type: 'integer',
+      enum: [0, 1], // 0 = public 1 = register user only
+      defaultsTo: 0
+    },
+
     activities: {
       collection: 'activity',
       via: 'lb'

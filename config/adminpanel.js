@@ -133,6 +133,13 @@ module.exports.adminpanel = {
           displayField: 'tag'
         },
         publish: 'Published',
+        visibility: {
+          title: 'Visibility',
+          enum: {
+            0: 'Registered user only',
+            1: 'Public'
+          }
+        },
         activities: {
           title: 'Activity',
           model: 'Activity',

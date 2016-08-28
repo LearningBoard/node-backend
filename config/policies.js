@@ -64,12 +64,14 @@ module.exports.policies = {
   },
 
   'UserController': {
-    'create': true
+    'create': true,
+    'get': true
   },
 
   'LearningBoardController': {
     'getAll': true,
-    'get': true
+    'get': true,
+    'search': true
   },
 
   'FileController': {

@@ -23,21 +23,20 @@ module.exports = {
   getAll: function (req, res) {
     var constraint = {};
     if (req.query.hasOwnProperty('user')) {
-      if (!req.session.authenticated) {
-        return res.forbidden({
-          success: false,
-          message: 'Login required'
-        });
+      if (req.param('user')) {
+        constraint.publish = true;
+        constraint.author = req.param('user');
       } else {
-        if (req.param('user')) {
-          constraint.publish = true;
-          constraint.author = req.param('user');
-        } else {
-          constraint.or = [
-            {publish: true},
-            {author: req.user.id}
-          ];
+        if (!req.session.authenticated) {
+          return res.forbidden({
+            success: false,
+            message: 'Login required'
+          });
         }
+        constraint.or = [
+          {publish: true},
+          {author: req.user.id}
+        ];
       }
     } else {
       constraint.publish = true;
@@ -103,6 +102,11 @@ module.exports = {
       } else if (!learningboard.publish && learningboard.author.id != req.user.id) {
         // prevent access to unpublish board
         throw {status: 403, message: 'Learning Board not published'};
+      }else if (learningboard.visibility === 1 && !req.user) {
+        return res.send({
+          success: false,
+          message: 'Registered user only'
+        });
       } else {
         var hiddenForOutput = ['like', 'subscribe', 'createdBy', 'owner', 'createdAt', 'updatedAt'];
         return learningboard.toJSON(hiddenForOutput, req.user).then(function(lb){
