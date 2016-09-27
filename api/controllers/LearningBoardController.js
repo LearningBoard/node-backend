@@ -19,6 +19,10 @@
 
 module.exports = {
 
+  _config: {
+    rest: true
+  },
+
   // Get all published learning board general infomation
   getAll: function (req, res) {
     var constraint = {};
@@ -171,6 +175,8 @@ module.exports = {
   },
 
   // Delete existing Learning Board
+  // Handle by blueprint to avoid bugs in some db
+  /*
   delete: function (req, res) {
     LearningBoard.destroy({
       id: req.param('board_id'),
@@ -186,6 +192,7 @@ module.exports = {
       });
     });
   },
+  */
 
   // Set Learning Board public
   publish: function (req, res) {

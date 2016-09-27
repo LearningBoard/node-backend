@@ -69,13 +69,13 @@ module.exports = {
     toJSON: function (filter, user) {
       var obj = this.toObject();
       // statistics
-      obj.activity_num = obj.activities.reduce(function(count, item) {
+      obj.activity_num = obj.activities ? obj.activities.reduce(function(count, item) {
         if (item.publish) {
           return ++count;
         } else {
           return count;
         }
-      }, 0);
+      }, 0) : 0;
       obj.activity_num_all = obj.activities ? obj.activities.length : 0;
       obj.like_num = obj.like ? obj.like.length : 0;
       obj.subscribing_num = obj.subscribe ? obj.subscribe.length : 0;

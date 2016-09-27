@@ -19,6 +19,10 @@ var prepareFilteredData = function(input){
 
 module.exports = {
 
+  _config: {
+    rest: true
+  },
+
   // Get single activity (mainly for edit activity use)
   get: function (req, res) {
     Activity.findOne({
@@ -109,6 +113,8 @@ module.exports = {
   },
 
   // Delete existing activity
+  // Handle by blueprint to avoid bugs in some db
+  /*
   delete: function (req, res) {
     Activity.destroy({
       id: req.param('activity_id'),
@@ -124,6 +130,7 @@ module.exports = {
       });
     });
   },
+  */
 
   // Set activity public
   publish: function (req, res) {

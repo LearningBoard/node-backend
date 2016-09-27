@@ -59,6 +59,15 @@ module.exports.policies = {
     'CriteriaPolicy'
   ],
 
+  'ActivityController': {
+    // blueprint
+    'find': false,
+    'fineOne': false,
+    'populate': false,
+    'add': false,
+    'remove': false
+  },
+
   'AuthController': {
     '*': [ 'passport' ]
   },
@@ -69,6 +78,13 @@ module.exports.policies = {
   },
 
   'LearningBoardController': {
+    // blueprint
+    'find': false,
+    'fineOne': false,
+    'populate': false,
+    'add': false,
+    'remove': false,
+    // our system
     'getAll': true,
     'get': true,
     'search': true
