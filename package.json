@@ -30,7 +30,7 @@
     "jsonwebtoken": "^7.1.6",
     "lodash": "^4.13.1",
     "md5": "^2.1.0",
-    "mime-types": "^2.1.11",
+    "mime-types": "^2.1.12",
     "passport-facebook": "^2.1.1",
     "rc": "1.0.1",
     "request": "^2.74.0",
