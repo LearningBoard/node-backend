@@ -56,7 +56,10 @@ module.exports.http = {
     var token = authString[1];
     require('jsonwebtoken').verify(token, sails.config.session.secret, function(err, user) {
       if (err || !user) {
-        return res.status(403).send({
+        return res.status(401).set({
+          'Access-Control-Allow-Origin': sails.config.cors.origin,
+          'Access-Control-Allow-Credentials': sails.config.cors.credentials
+        }).send({
           success: false,
           message: err
         });

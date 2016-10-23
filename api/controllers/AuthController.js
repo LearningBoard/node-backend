@@ -10,6 +10,11 @@ var _super = require('sails-auth/api/controllers/AuthController');
 var jwt = require('jsonwebtoken');
 var request = require('request-promise-native');
 
+var tokenExpiresIn = 60 * 60 * 24; // second
+if (sails.config.session && sails.config.session.cookie && sails.config.session.cookie.maxAge) {
+  tokenExpiresIn = sails.config.session.cookie.maxAge / 1000;
+}
+
 _.merge(exports, _super);
 _.merge(exports, { // Override sails-auth method
 
@@ -76,7 +81,7 @@ _.merge(exports, { // Override sails-auth method
             success: true,
             data: {
               token: jwt.sign(user, sails.config.session.secret, {
-                expiresIn: 60 * 60 * 24 // second
+                expiresIn: tokenExpiresIn
               }),
               user: user
             }
@@ -155,7 +160,7 @@ _.merge(exports, { // Override sails-auth method
               success: true,
               data: {
                 token: jwt.sign(user, sails.config.session.secret, {
-                  expiresIn: 60 * 60 * 24 // second
+                  expiresIn: tokenExpiresIn
                 }),
                 user: user
               }
