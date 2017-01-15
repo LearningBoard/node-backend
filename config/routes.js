@@ -47,7 +47,7 @@ module.exports.routes = {
   'POST /lb': 'LearningBoardController.create',
   'GET /lb/:board_id': 'LearningBoardController.get',
   'PUT /lb/:board_id': 'LearningBoardController.update',
-  //'DELETE /learningboard/:board_id': 'LearningBoardController.delete', // Handle by blueprint to avoid bugs in some db
+  'DELETE /lb/:id': {blueprint: 'destroy', model: 'learningboard'}, // Handle by blueprint to avoid bugs in some db
 
   'POST /activity/publish/:activity_id': 'ActivityController.publish',
   'POST /activity/complete/:activity_id': 'ActivityController.complete',
@@ -55,7 +55,7 @@ module.exports.routes = {
   'POST /activity': 'ActivityController.create',
   'GET /activity/:activity_id': 'ActivityController.get',
   'PUT /activity/:activity_id': 'ActivityController.update',
-  //'DELETE /activity/:activity_id': 'ActivityController.delete', // Handle by blueprint to avoid bugs in some db
+  'DELETE /activity/:id': {blueprint: 'destroy', model: 'activity'}, // Handle by blueprint to avoid bugs in some db
 
   'POST /comment': 'CommentController.create',
 
