@@ -64,7 +64,10 @@ module.exports.routes = {
 
   'POST /search/lb': 'LearningBoard.search',
 
-  'POST /media': 'FileController.create'
+  'POST /media': 'FileController.create',
+
+  'GET /analytics': {blueprint: 'find', model: 'analytics'},
+  'POST /analytics': {blueprint: 'create', model: 'analytics'}
 
   /***************************************************************************
   *                                                                          *
