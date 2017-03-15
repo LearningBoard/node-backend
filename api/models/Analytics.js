@@ -16,6 +16,16 @@ module.exports = {
       model: 'learningboard'
     },
 
+    activity: {
+      model: 'activity',
+      defaultsTo: null
+    },
+
+    session: {
+      type: 'string',
+      required: true
+    },
+
     data: {
       type: 'json',
       defaultsTo: {}
