@@ -22,7 +22,7 @@ module.exports = {
         if (!session[data[i].session]) {
           session[data[i].session] = [];
         }
-        if (userArray.indexOf(data[i].user)) {
+        if (userArray.indexOf(data[i].user) === -1) {
           userArray.push(data[i].user);
         }
         session[data[i].session].push(data[i]);
