@@ -40,6 +40,37 @@ module.exports = {
         message: err
       });
     });
+  },
+
+  // Get activity analytics summary
+  getActivityData: function (req, res) {
+    Analytics.find({
+      activity: req.param('activity_id')
+    }).then(function(data){
+      var userArray = [];
+      var session = {};
+      for (var i = 0; i < data.length; i++) {
+        if (!session[data[i].session]) {
+          session[data[i].session] = [];
+        }
+        if (userArray.indexOf(data[i].user) === -1) {
+          userArray.push(data[i].user);
+        }
+        session[data[i].session].push(data[i]);
+      }
+      return res.send({
+        success: true,
+        data: {
+          totalUser: userArray.length,
+          session: session
+        }
+      });
+    }).catch(function(err){
+      return res.status(err.status || 500).send({
+        success: false,
+        message: err
+      });
+    });
   }
 
 };

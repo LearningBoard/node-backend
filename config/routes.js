@@ -68,6 +68,7 @@ module.exports.routes = {
 
   'GET /analytics': {blueprint: 'find', model: 'analytics'},
   'GET /analytics/lb/:board_id': 'AnalyticsController.getLBData',
+  'GET /analytics/activity/:activity_id': 'AnalyticsController.getActivityData',
   'POST /analytics': {blueprint: 'create', model: 'analytics'}
 
   /***************************************************************************
