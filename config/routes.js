@@ -67,6 +67,7 @@ module.exports.routes = {
   'POST /media': 'FileController.create',
 
   'GET /analytics': {blueprint: 'find', model: 'analytics'},
+  'POST /analytics/lb/clustering': 'AnalyticsController.postLbClustering',
   'GET /analytics/lb/:board_id': 'AnalyticsController.getLBData',
   'GET /analytics/activity/:activity_id': 'AnalyticsController.getActivityData',
   'POST /analytics': {blueprint: 'create', model: 'analytics'}
