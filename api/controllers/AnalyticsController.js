@@ -52,7 +52,8 @@ module.exports = {
       var result = kmeans(kmeansData, cluster);
       return res.send({
         success: true,
-        data: result.centroids
+        rawData: kmeansData,
+        result: result
       });
     }).catch(function(err) {
       return res.status(err.status || 500).send({
